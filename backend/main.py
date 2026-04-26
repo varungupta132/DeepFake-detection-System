@@ -58,9 +58,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "https://deep-fake-detection-system-theta.vercel.app,http://localhost:3000,http://localhost:8000,http://127.0.0.1:5500"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # allow all for now, can restrict later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
