@@ -1,216 +1,166 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Upload, Scan, Brain, BarChart3, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
+import { Upload, Cpu, BarChart3, FileText, ArrowRight, CheckCircle, Zap, Brain, Eye, Activity } from 'lucide-react'
 
-export default function HowItWorks() {
-  const steps = [
-    {
-      icon: <Upload className="w-12 h-12" />,
-      title: 'Video Upload',
-      description: 'User uploads a video file through our secure interface. The system validates the file format and size before processing.',
-      details: [
-        'Supports multiple video formats (MP4, AVI, MOV, MKV)',
-        'Maximum file size: 100MB',
-        'Secure upload with encryption',
-        'Automatic format validation'
-      ]
-    },
-    {
-      icon: <Scan className="w-12 h-12" />,
-      title: 'Frame Extraction & Face Detection',
-      description: 'The system extracts key frames from the video and uses computer vision to detect and crop faces.',
-      details: [
-        'Intelligent frame sampling (10-100 frames)',
-        'Face detection using dlib/face_recognition',
-        'Automatic face alignment and cropping',
-        'Preprocessing and normalization'
-      ]
-    },
-    {
-      icon: <Brain className="w-12 h-12" />,
-      title: 'Deep Learning Analysis',
-      description: 'Our ResNeXt + LSTM model analyzes facial features and temporal patterns to detect manipulation.',
-      details: [
-        'ResNeXt-50 for spatial feature extraction',
-        'LSTM for temporal pattern analysis',
-        'Trained on 1000+ real and fake videos',
-        '93%+ accuracy on test datasets'
-      ]
-    },
-    {
-      icon: <BarChart3 className="w-12 h-12" />,
-      title: 'Results & Visualization',
-      description: 'The system generates a comprehensive report with confidence scores and visual analysis.',
-      details: [
-        'Real vs Fake classification',
-        'Confidence percentage',
-        'Frame-by-frame analysis',
-        'Downloadable JSON report'
-      ]
-    }
-  ]
+const pipeline = [
+  {
+    step: '01',
+    icon: Upload,
+    title: 'Video Upload & Validation',
+    color: 'from-violet-500 to-purple-600',
+    glow: 'rgba(124,58,237,0.3)',
+    points: [
+      'Accepts MP4, AVI, MOV, MKV, WebM formats',
+      'File size validation up to 100MB',
+      'Automatic format detection and preprocessing',
+      'Secure temporary storage with auto-cleanup',
+    ],
+  },
+  {
+    step: '02',
+    icon: Cpu,
+    title: 'Intelligent Frame Extraction',
+    color: 'from-cyan-500 to-blue-600',
+    glow: 'rgba(0,212,255,0.3)',
+    points: [
+      'Quality-based frame selection algorithm',
+      'Laplacian variance blur detection',
+      'Adaptive sampling rate based on video length',
+      'Multi-scale face detection with Haar Cascades',
+    ],
+  },
+  {
+    step: '03',
+    icon: Brain,
+    title: 'Multi-Modal AI Analysis',
+    color: 'from-pink-500 to-rose-600',
+    glow: 'rgba(236,72,153,0.3)',
+    points: [
+      'Vision Transformer spatial feature extraction',
+      'Temporal consistency across frame sequences',
+      'DCT-based frequency domain artifact detection',
+      'Color distribution and motion pattern analysis',
+    ],
+  },
+  {
+    step: '04',
+    icon: FileText,
+    title: 'Report Generation',
+    color: 'from-emerald-500 to-teal-600',
+    glow: 'rgba(16,185,129,0.3)',
+    points: [
+      'Confidence score with probability breakdown',
+      'Per-frame analysis visualization',
+      'Warning flags for suspicious indicators',
+      'Exportable JSON report with full metadata',
+    ],
+  },
+]
 
+const signals = [
+  { icon: Activity, label: 'Temporal Consistency', desc: 'Frame-to-frame optical flow analysis detects unnatural transitions', color: 'text-violet-400' },
+  { icon: Zap, label: 'Compression Artifacts', desc: 'DCT block analysis reveals GAN generation fingerprints', color: 'text-cyan-400' },
+  { icon: Eye, label: 'Face Quality', desc: 'Multi-scale Haar Cascade detection with eye verification', color: 'text-pink-400' },
+  { icon: BarChart3, label: 'Edge Consistency', desc: 'Canny edge density variance across frames', color: 'text-emerald-400' },
+  { icon: Brain, label: 'Color Distribution', desc: 'HSV histogram entropy analysis for unnatural patterns', color: 'text-amber-400' },
+  { icon: Cpu, label: 'Motion Patterns', desc: 'Lucas-Kanade optical flow for unnatural movement detection', color: 'text-blue-400' },
+]
+
+export default function HowItWorksPage() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto"
-      >
+    <div className="min-h-screen py-16 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="gradient-text">How It Works</span>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-20"
+        >
+          <span className="tag tag-cyan mb-4 inline-flex">Technical Deep Dive</span>
+          <h1 className="text-5xl sm:text-6xl font-black mb-5">
+            How It <span className="text-gradient">Works</span>
           </h1>
-          <p className="text-xl text-purple-200 max-w-3xl mx-auto">
-            Our deepfake detection system uses advanced AI and computer vision to analyze videos 
-            and identify signs of manipulation with high accuracy.
+          <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
+            A four-stage pipeline combining computer vision and deep learning to detect deepfake manipulation with high accuracy.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Process Steps */}
-        <div className="space-y-12 mb-16">
-          {steps.map((step, index) => (
+        {/* Pipeline */}
+        <div className="space-y-6 mb-24">
+          {pipeline.map((stage, i) => (
             <motion.div
-              key={index}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+              key={stage.step}
+              initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.2 }}
-              className="glass-effect p-8 md:p-12"
+              transition={{ delay: i * 0.1 }}
+              className="glass-card p-8"
             >
-              <div className="flex flex-col md:flex-row gap-8 items-start">
-                {/* Step Number & Icon */}
-                <div className="flex-shrink-0">
-                  <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl font-bold mb-4">
-                    {index + 1}
-                  </div>
-                  <div className="text-purple-400">
-                    {step.icon}
+              <div className="flex flex-col sm:flex-row items-start gap-6">
+                <div className="flex-shrink-0 flex items-center gap-4">
+                  <div className="text-6xl font-black text-gradient opacity-20">{stage.step}</div>
+                  <div
+                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${stage.color} flex items-center justify-center shadow-xl`}
+                    style={{ boxShadow: `0 10px 30px ${stage.glow}` }}
+                  >
+                    <stage.icon className="w-7 h-7 text-white" />
                   </div>
                 </div>
-
-                {/* Content */}
-                <div className="flex-grow">
-                  <h2 className="text-3xl font-bold mb-4">{step.title}</h2>
-                  <p className="text-lg text-purple-200 mb-6 leading-relaxed">
-                    {step.description}
-                  </p>
-                  <ul className="space-y-2">
-                    {step.details.map((detail, i) => (
-                      <li key={i} className="flex items-start gap-3 text-purple-100">
-                        <ArrowRight className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                        <span>{detail}</span>
-                      </li>
+                <div className="flex-1">
+                  <h3 className="text-white text-xl font-bold mb-4">{stage.title}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {stage.points.map((point) => (
+                      <div key={point} className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <span className="text-slate-300 text-sm">{point}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
+                {i < pipeline.length - 1 && (
+                  <div className="hidden sm:flex items-center self-center">
+                    <ArrowRight className="w-6 h-6 text-violet-500" />
+                  </div>
+                )}
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Technical Pipeline */}
+        {/* 6 Detection Signals */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-16"
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl font-bold mb-8 text-center">Technical Pipeline</h2>
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <div className="glass-effect p-4 flex-1 text-center">
-                <h3 className="font-semibold mb-2">Input Video</h3>
-                <p className="text-sm text-purple-200">MP4, AVI, MOV, etc.</p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-purple-400 rotate-90 md:rotate-0" />
-              <div className="glass-effect p-4 flex-1 text-center">
-                <h3 className="font-semibold mb-2">Frame Extraction</h3>
-                <p className="text-sm text-purple-200">OpenCV processing</p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-purple-400 rotate-90 md:rotate-0" />
-              <div className="glass-effect p-4 flex-1 text-center">
-                <h3 className="font-semibold mb-2">Face Detection</h3>
-                <p className="text-sm text-purple-200">dlib + face_recognition</p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-purple-400 rotate-90 md:rotate-0" />
-              <div className="glass-effect p-4 flex-1 text-center">
-                <h3 className="font-semibold mb-2">ML Model</h3>
-                <p className="text-sm text-purple-200">ResNeXt + LSTM</p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-purple-400 rotate-90 md:rotate-0" />
-              <div className="glass-effect p-4 flex-1 text-center">
-                <h3 className="font-semibold mb-2">Results</h3>
-                <p className="text-sm text-purple-200">Real/Fake + Confidence</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Why It's Accurate */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-16"
-        >
-          <h2 className="text-3xl font-bold mb-8 text-center">Why Our System is Accurate</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-purple-300">Advanced Architecture</h3>
-              <p className="text-purple-100 leading-relaxed">
-                We use ResNeXt-50, a state-of-the-art convolutional neural network, combined with 
-                LSTM layers to capture both spatial and temporal features. This dual approach allows 
-                us to detect subtle inconsistencies that simpler models might miss.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-purple-300">Comprehensive Training</h3>
-              <p className="text-purple-100 leading-relaxed">
-                Our model is trained on the FaceForensics++ dataset, which includes over 1000 videos 
-                created using various deepfake techniques. This diverse training data helps the model 
-                generalize well to different types of manipulations.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-purple-300">Multi-Frame Analysis</h3>
-              <p className="text-purple-100 leading-relaxed">
-                Unlike single-frame detectors, our system analyzes sequences of frames to detect 
-                temporal inconsistencies. Deepfakes often have subtle flickering or unnatural 
-                movements that become apparent when viewing multiple frames.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-purple-300">Continuous Improvement</h3>
-              <p className="text-purple-100 leading-relaxed">
-                We regularly update our model with new training data and techniques to stay ahead 
-                of evolving deepfake technology. Our system is designed to adapt to new manipulation 
-                methods as they emerge.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <h2 className="text-3xl font-bold mb-6">Ready to Try It?</h2>
-          <p className="text-xl text-purple-200 mb-8">
-            Upload your video and see our AI in action
+          <span className="tag tag-purple mb-4 inline-flex">Detection Engine</span>
+          <h2 className="text-4xl font-black mb-4">
+            6 Independent <span className="text-gradient">Detection Signals</span>
+          </h2>
+          <p className="text-slate-400 max-w-xl mx-auto">
+            Each signal independently scores the video. The final verdict is a weighted fusion of all six.
           </p>
-          <Link href="/" className="btn-primary inline-flex items-center gap-2 text-lg">
-            Try Demo Now
-            <ArrowRight className="w-5 h-5" />
-          </Link>
         </motion.div>
-      </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {signals.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className="glass-card p-6"
+            >
+              <s.icon className={`w-8 h-8 ${s.color} mb-4`} />
+              <h4 className="text-white font-bold mb-2">{s.label}</h4>
+              <p className="text-slate-400 text-sm leading-relaxed">{s.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

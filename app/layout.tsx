@@ -5,33 +5,26 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import { Toaster } from 'react-hot-toast'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'Deepfake Detection System | AI-Powered Video Analysis',
-  description: 'Advanced AI-powered deepfake detection system using ResNeXt + LSTM architecture. Detect manipulated videos with 93%+ accuracy.',
-  keywords: 'deepfake, detection, AI, machine learning, video analysis, fake video',
-  authors: [{ name: 'Your Name' }],
+  title: 'DeepGuard AI — Deepfake Detection System',
+  description: 'Next-generation AI-powered deepfake detection using Vision Transformer + Temporal Analysis. Detect manipulated videos with 93%+ accuracy.',
+  keywords: 'deepfake detection, AI video analysis, fake video detector, vision transformer',
   openGraph: {
-    title: 'Deepfake Detection System',
-    description: 'AI-powered deepfake detection with 93%+ accuracy',
+    title: 'DeepGuard AI — Deepfake Detection',
+    description: 'Detect deepfake videos with AI precision',
     type: 'website',
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <div className="min-h-screen flex flex-col">
+    <html lang="en" className={inter.variable}>
+      <body className={`${inter.className} bg-animated grid-pattern`}>
+        <div className="min-h-screen flex flex-col relative z-10">
           <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
+          <main className="flex-grow">{children}</main>
           <Footer />
         </div>
         <Toaster
@@ -39,23 +32,16 @@ export default function RootLayout({
           toastOptions={{
             duration: 4000,
             style: {
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-              color: '#fff',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(10, 15, 46, 0.95)',
+              backdropFilter: 'blur(20px)',
+              color: '#e2e8f0',
+              border: '1px solid rgba(124, 58, 237, 0.3)',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '500',
             },
-            success: {
-              iconTheme: {
-                primary: '#10b981',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
-              },
-            },
+            success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+            error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
           }}
         />
       </body>

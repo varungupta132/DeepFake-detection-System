@@ -1,260 +1,177 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Shield, Target, Users, Lightbulb, Heart, ArrowRight } from 'lucide-react'
+import { Shield, Target, Users, Lightbulb, ArrowRight, CheckCircle, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-export default function About() {
+const useCases = [
+  { title: 'Journalists & Media', desc: 'Verify video authenticity before publication to maintain credibility and combat misinformation.', icon: '📰' },
+  { title: 'Researchers', desc: 'Study deepfake detection techniques and contribute to more robust detection methods.', icon: '🔬' },
+  { title: 'Law Enforcement', desc: 'Investigate cases involving manipulated video evidence and digital fraud.', icon: '⚖️' },
+  { title: 'General Public', desc: 'Verify suspicious videos on social media and protect yourself from misinformation.', icon: '👥' },
+]
+
+const roadmap = [
+  'Real-time video stream detection',
+  'Browser extension for social media',
+  'Public REST API for developers',
+  'Audio deepfake detection',
+  'Multi-language support',
+  'Community verified dataset',
+]
+
+const techStack = [
+  { name: 'Next.js 14', category: 'Frontend' },
+  { name: 'TypeScript', category: 'Frontend' },
+  { name: 'Tailwind CSS', category: 'Frontend' },
+  { name: 'Framer Motion', category: 'Frontend' },
+  { name: 'FastAPI', category: 'Backend' },
+  { name: 'PyTorch', category: 'AI/ML' },
+  { name: 'OpenCV', category: 'AI/ML' },
+  { name: 'Vision Transformer', category: 'AI/ML' },
+]
+
+export default function AboutPage() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto"
-      >
+    <div className="min-h-screen py-16 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="gradient-text">About This Project</span>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-20"
+        >
+          <span className="tag tag-cyan mb-4 inline-flex">About the Project</span>
+          <h1 className="text-5xl sm:text-6xl font-black mb-5">
+            Fighting <span className="text-gradient">Digital Deception</span>
           </h1>
-          <p className="text-xl text-purple-200 max-w-3xl mx-auto">
-            Fighting misinformation and protecting digital authenticity with AI
+          <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
+            DeepGuard AI is an open-source deepfake detection system built to protect digital authenticity and combat AI-generated misinformation.
           </p>
-        </div>
+        </motion.div>
 
         {/* Mission */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
+          className="glass-card p-8 mb-8"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <Target className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Our Mission</h2>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center">
+              <Target className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-2xl font-black text-white">Our Mission</h2>
           </div>
-          <p className="text-lg text-purple-100 leading-relaxed mb-6">
-            In an era where deepfake technology is becoming increasingly sophisticated and accessible, 
-            the need for reliable detection tools has never been more critical. Our mission is to 
-            democratize access to advanced deepfake detection technology, making it available to 
-            everyone from journalists and researchers to everyday users concerned about digital authenticity.
-          </p>
-          <p className="text-lg text-purple-100 leading-relaxed">
-            We believe that by providing transparent, accurate, and easy-to-use detection tools, we can 
-            help combat misinformation, protect individuals from malicious deepfakes, and restore trust 
-            in digital media.
+          <p className="text-slate-300 leading-relaxed text-lg">
+            As deepfake technology becomes increasingly accessible, the need for reliable detection tools has never been more critical. We're democratizing access to advanced AI detection — making it available to everyone from journalists to everyday users concerned about digital authenticity.
           </p>
         </motion.div>
 
-        {/* The Problem */}
+        {/* Use cases */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
+          className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <Shield className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">The Deepfake Challenge</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-purple-300">Growing Threat</h3>
-              <p className="text-purple-100 leading-relaxed">
-                Deepfake technology has evolved rapidly, making it possible to create highly convincing 
-                fake videos with minimal technical expertise. These manipulated videos can be used for:
-              </p>
-              <ul className="mt-4 space-y-2 text-purple-200">
-                <li>• Spreading political misinformation</li>
-                <li>• Creating non-consensual content</li>
-                <li>• Financial fraud and scams</li>
-                <li>• Damaging reputations</li>
-                <li>• Undermining trust in media</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-purple-300">Real-World Impact</h3>
-              <p className="text-purple-100 leading-relaxed mb-4">
-                The consequences of deepfakes are already being felt across society:
-              </p>
-              <ul className="space-y-2 text-purple-200">
-                <li>• <strong>Politics:</strong> Fake videos of politicians making false statements</li>
-                <li>• <strong>Business:</strong> CEO fraud costing companies millions</li>
-                <li>• <strong>Personal:</strong> Revenge porn and harassment</li>
-                <li>• <strong>Media:</strong> Erosion of trust in news and journalism</li>
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Our Solution */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
-        >
-          <div className="flex items-center gap-4 mb-8">
-            <Lightbulb className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Our Solution</h2>
-          </div>
-          <p className="text-lg text-purple-100 leading-relaxed mb-8">
-            We've developed a state-of-the-art deepfake detection system that combines advanced computer 
-            vision and deep learning to identify manipulated videos with high accuracy. Our approach:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-effect p-6">
-              <h3 className="text-lg font-semibold mb-3 text-purple-300">Accessible</h3>
-              <p className="text-purple-200 text-sm">
-                Simple web interface that anyone can use without technical knowledge
-              </p>
-            </div>
-            <div className="glass-effect p-6">
-              <h3 className="text-lg font-semibold mb-3 text-purple-300">Accurate</h3>
-              <p className="text-purple-200 text-sm">
-                93%+ accuracy using ResNeXt + LSTM architecture trained on thousands of videos
-              </p>
-            </div>
-            <div className="glass-effect p-6">
-              <h3 className="text-lg font-semibold mb-3 text-purple-300">Transparent</h3>
-              <p className="text-purple-200 text-sm">
-                Detailed explanations of results with confidence scores and visual analysis
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Technology Stack */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
-        >
-          <h2 className="text-3xl font-bold mb-8 text-center">Built With Modern Technology</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { name: 'Next.js 14', desc: 'React Framework' },
-              { name: 'PyTorch', desc: 'Deep Learning' },
-              { name: 'FastAPI', desc: 'Backend API' },
-              { name: 'Tailwind CSS', desc: 'Styling' },
-              { name: 'TypeScript', desc: 'Type Safety' },
-              { name: 'OpenCV', desc: 'Computer Vision' },
-              { name: 'Framer Motion', desc: 'Animations' },
-              { name: 'Vercel', desc: 'Deployment' },
-            ].map((tech, index) => (
+          <h2 className="text-3xl font-black text-white mb-6 flex items-center gap-3">
+            <Users className="w-6 h-6 text-cyan-400" />
+            Who Uses DeepGuard?
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {useCases.map((uc, i) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                key={uc.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="glass-effect p-4 text-center"
+                transition={{ delay: i * 0.08 }}
+                className="glass-card p-6"
               >
-                <div className="font-semibold text-purple-300 mb-1">{tech.name}</div>
-                <div className="text-sm text-purple-200">{tech.desc}</div>
+                <div className="text-3xl mb-3">{uc.icon}</div>
+                <h3 className="text-white font-bold text-lg mb-2">{uc.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{uc.desc}</p>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Use Cases */}
+        {/* Tech stack */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
+          className="glass-card p-8 mb-8"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <Users className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Who Can Use This?</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-effect p-6">
-              <h3 className="text-xl font-semibold mb-3 text-purple-300">Journalists & Media</h3>
-              <p className="text-purple-100">
-                Verify the authenticity of video content before publication to maintain credibility 
-                and combat misinformation.
-              </p>
-            </div>
-            <div className="glass-effect p-6">
-              <h3 className="text-xl font-semibold mb-3 text-purple-300">Researchers</h3>
-              <p className="text-purple-100">
-                Study deepfake detection techniques and contribute to the development of more 
-                robust detection methods.
-              </p>
-            </div>
-            <div className="glass-effect p-6">
-              <h3 className="text-xl font-semibold mb-3 text-purple-300">Law Enforcement</h3>
-              <p className="text-purple-100">
-                Investigate cases involving manipulated video evidence and digital fraud.
-              </p>
-            </div>
-            <div className="glass-effect p-6">
-              <h3 className="text-xl font-semibold mb-3 text-purple-300">General Public</h3>
-              <p className="text-purple-100">
-                Verify suspicious videos encountered on social media and protect yourself from 
-                misinformation.
-              </p>
-            </div>
+          <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+            <Lightbulb className="w-6 h-6 text-pink-400" />
+            Built With
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {techStack.map((t, i) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+                className="p-4 bg-white/5 rounded-xl border border-white/10 text-center hover:border-violet-500/30 transition-all"
+              >
+                <div className="text-white font-semibold text-sm">{t.name}</div>
+                <div className="text-slate-500 text-xs mt-1">{t.category}</div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
-        {/* Future Vision */}
+        {/* Roadmap */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
+          className="glass-card p-8 mb-12"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <Heart className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Future Vision</h2>
+          <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+            <Shield className="w-6 h-6 text-emerald-400" />
+            Roadmap
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {roadmap.map((item, i) => (
+              <motion.div
+                key={item}
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                className="flex items-center gap-3 p-3 bg-white/5 rounded-xl"
+              >
+                <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span className="text-slate-300 text-sm">{item}</span>
+              </motion.div>
+            ))}
           </div>
-          <p className="text-lg text-purple-100 leading-relaxed mb-6">
-            This project represents just the beginning of our journey to combat deepfakes. Our roadmap includes:
-          </p>
-          <ul className="space-y-3 text-purple-100">
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
-              <span><strong>Real-time Detection:</strong> Process videos as they're being recorded or streamed</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
-              <span><strong>Browser Extension:</strong> Detect deepfakes directly on social media platforms</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
-              <span><strong>API Access:</strong> Allow developers to integrate our detection into their applications</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
-              <span><strong>Multi-modal Detection:</strong> Analyze audio and metadata alongside video</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
-              <span><strong>Community Dataset:</strong> Build a collaborative database of verified deepfakes</span>
-            </li>
-          </ul>
         </motion.div>
 
         {/* CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           className="text-center"
         >
-          <h2 className="text-3xl font-bold mb-6">Join the Fight Against Deepfakes</h2>
-          <p className="text-xl text-purple-200 mb-8">
-            Try our detection system and help protect digital authenticity
-          </p>
-          <Link href="/" className="btn-primary inline-flex items-center gap-2 text-lg">
-            Try Demo Now
+          <h2 className="text-4xl font-black text-white mb-4">Ready to Try It?</h2>
+          <p className="text-slate-400 text-lg mb-8">Upload a video and get your AI analysis in seconds.</p>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold text-lg shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50 hover:scale-105 transition-all duration-300"
+          >
+            <Zap className="w-5 h-5" />
+            Analyze a Video
             <ArrowRight className="w-5 h-5" />
           </Link>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   )
 }

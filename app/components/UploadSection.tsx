@@ -1,286 +1,394 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { motion } from 'framer-motion'
-import { Upload, XCircle, Loader2, ArrowLeft } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Upload, X, ArrowLeft, Video, Zap, FileVideo,
+  CheckCircle, AlertCircle, Loader2, SlidersHorizontal
+} from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'react-hot-toast'
 import { DetectionResult } from '../page'
 
-interface UploadSectionProps {
+interface Props {
   onResult: (result: DetectionResult) => void
   onBack: () => void
 }
 
-export default function UploadSection({ onResult, onBack }: UploadSectionProps) {
+const STAGES = [
+  { label: 'Uploading video', icon: Upload },
+  { label: 'Extracting frames', icon: FileVideo },
+  { label: 'Detecting faces', icon: Zap },
+  { label: 'Running AI analysis', icon: Zap },
+  { label: 'Generating report', icon: CheckCircle },
+]
+
+export default function UploadSection({ onResult, onBack }: Props) {
   const [file, setFile] = useState<File | null>(null)
-  const [sequenceLength, setSequenceLength] = useState(40)
+  const [numFrames, setNumFrames] = useState(30)
   const [isProcessing, setIsProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [stage, setStage] = useState(0)
+  const [preview, setPreview] = useState<string | null>(null)
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0]
-      
-      // Validate file size (100MB max)
-      if (file.size > 100 * 1024 * 1024) {
-        toast.error('File size must be less than 100MB')
-        return
-      }
-      
-      setFile(file)
-      toast.success('Video uploaded successfully!')
+  const onDrop = useCallback((accepted: File[]) => {
+    if (!accepted.length) return
+    const f = accepted[0]
+    if (f.size > 100 * 1024 * 1024) {
+      toast.error('File must be under 100MB')
+      return
     }
+    setFile(f)
+    const url = URL.createObjectURL(f)
+    setPreview(url)
+    toast.success('Video ready for analysis!')
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'video/*': ['.mp4', '.avi', '.mov', '.mkv', '.webm']
-    },
+    accept: { 'video/*': ['.mp4', '.avi', '.mov', '.mkv', '.webm'] },
     maxFiles: 1,
     multiple: false,
+    disabled: isProcessing,
   })
 
-  const handleUpload = async () => {
-    if (!file) {
-      toast.error('Please select a video file first')
-      return
-    }
+  const removeFile = () => {
+    setFile(null)
+    if (preview) URL.revokeObjectURL(preview)
+    setPreview(null)
+  }
+
+  const handleAnalyze = async () => {
+    if (!file) return toast.error('Please select a video first')
 
     setIsProcessing(true)
     setProgress(0)
+    setStage(0)
 
-    // Simulate progress
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(progressInterval)
-          return 90
-        }
-        return prev + 10
+    // Animate through stages
+    const stageInterval = setInterval(() => {
+      setStage((s) => {
+        if (s >= STAGES.length - 1) { clearInterval(stageInterval); return s }
+        return s + 1
       })
-    }, 500)
+    }, 1200)
+
+    const progressInterval = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 88) { clearInterval(progressInterval); return 88 }
+        return p + Math.random() * 8
+      })
+    }, 600)
 
     const formData = new FormData()
     formData.append('upload_video_file', file)
-    formData.append('sequence_length', sequenceLength.toString())
+    formData.append('num_frames', numFrames.toString())
 
     try {
-      const response = await fetch('/api/predict', {
-        method: 'POST',
-        body: formData,
-      })
+      const res = await fetch('/api/predict', { method: 'POST', body: formData })
 
-      if (!response.ok) {
-        let errorMessage = 'Processing failed'
-        try {
-          const error = await response.json()
-          errorMessage = error.detail || error.message || errorMessage
-        } catch {
-          // If response is not JSON, get text
-          const text = await response.text()
-          errorMessage = text || `Server error: ${response.status}`
-        }
-        throw new Error(errorMessage)
-      }
-
-      const data = await response.json()
-      
+      clearInterval(stageInterval)
       clearInterval(progressInterval)
       setProgress(100)
-      
-      setTimeout(() => {
-        onResult(data)
-        toast.success('Video analyzed successfully!')
-      }, 500)
-      
-    } catch (error) {
-      clearInterval(progressInterval)
-      console.error('Upload error:', error)
-      
-      let errorMessage = 'Failed to process video. Please try again.'
-      
-      if (error instanceof Error) {
-        errorMessage = error.message
-        
-        // Add helpful hints for common errors
-        if (error.message.includes('Cannot connect') || error.message.includes('fetch')) {
-          errorMessage += '\n\nMake sure the backend is running:\ncd api && python main.py'
-        }
+      setStage(STAGES.length - 1)
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || `Server error ${res.status}`)
       }
-      
-      toast.error(errorMessage, { duration: 6000 })
-    } finally {
+
+      const data = await res.json()
+      await new Promise((r) => setTimeout(r, 600))
+      onResult(data)
+    } catch (err: any) {
+      clearInterval(stageInterval)
+      clearInterval(progressInterval)
       setIsProcessing(false)
       setProgress(0)
+      setStage(0)
+      toast.error(err.message || 'Analysis failed. Is the backend running?')
     }
   }
 
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto"
-      >
-        {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-purple-200 hover:text-white mb-8 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Home
-        </button>
-
+    <div className="min-h-screen py-12 px-4">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">Upload Video for Analysis</span>
-          </h1>
-          <p className="text-xl text-purple-200">
-            Upload a video file to detect if it's authentic or manipulated
-          </p>
-        </div>
-
-        {/* Upload Card */}
-        <div className="glass-effect p-8 glow-effect">
-          {/* Dropzone */}
-          <div
-            {...getRootProps()}
-            className={`upload-zone cursor-pointer ${
-              isDragActive ? 'border-purple-400 bg-purple-400/10' : ''
-            }`}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-4 mb-10"
+        >
+          <button
+            onClick={onBack}
+            disabled={isProcessing}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl glass text-slate-400 hover:text-white hover:bg-white/10 transition-all text-sm font-medium disabled:opacity-40"
           >
-            <input {...getInputProps()} />
-            <Upload className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">
-              {isDragActive ? 'Drop your video here' : 'Drag & Drop Video'}
-            </h3>
-            <p className="text-purple-200 mb-4">
-              or click to browse files
-            </p>
-            <p className="text-sm text-purple-300">
-              Supported: MP4, AVI, MOV, MKV, WebM (Max 100MB)
-            </p>
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+          <div>
+            <h1 className="text-2xl font-black text-white">Video Analysis</h1>
+            <p className="text-slate-400 text-sm">Upload a video to detect deepfake manipulation</p>
           </div>
+        </motion.div>
 
-          {/* File Preview */}
-          {file && (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Left: Upload + Settings */}
+          <div className="lg:col-span-3 space-y-5">
+            {/* Drop zone */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-8"
+              transition={{ delay: 0.1 }}
             >
-              <div className="glass-effect p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <p className="text-white font-medium text-lg">{file.name}</p>
-                    <p className="text-purple-200 text-sm mt-1">
-                      Size: {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setFile(null)}
-                    className="text-red-400 hover:text-red-300 transition-colors"
-                    disabled={isProcessing}
+              <AnimatePresence mode="wait">
+                {!file ? (
+                  <motion.div
+                    key="dropzone"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    {...getRootProps()}
+                    className={`upload-zone cursor-pointer p-12 text-center transition-all duration-300 ${
+                      isDragActive ? 'active' : ''
+                    } ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
                   >
-                    <XCircle className="w-6 h-6" />
-                  </button>
-                </div>
-
-                {/* Sequence Length Selector */}
-                <div className="mb-6">
-                  <label className="block text-white font-medium mb-3">
-                    Sequence Length: <span className="text-purple-400">{sequenceLength} frames</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="10"
-                    max="100"
-                    step="10"
-                    value={sequenceLength}
-                    onChange={(e) => setSequenceLength(Number(e.target.value))}
-                    disabled={isProcessing}
-                    className="w-full h-2 bg-purple-900/50 rounded-lg appearance-none cursor-pointer accent-purple-500"
-                  />
-                  <div className="flex justify-between text-xs text-purple-300 mt-2">
-                    <span>10</span>
-                    <span>30</span>
-                    <span>50</span>
-                    <span>70</span>
-                    <span>100</span>
-                  </div>
-                  <p className="text-sm text-purple-300 mt-2">
-                    Higher values provide more accurate results but take longer to process
-                  </p>
-                </div>
-
-                {/* Progress Bar */}
-                {isProcessing && (
-                  <div className="mb-6">
-                    <div className="flex justify-between text-sm text-purple-200 mb-2">
-                      <span>Processing...</span>
-                      <span>{progress}%</span>
+                    <input {...getInputProps()} />
+                    <motion.div
+                      animate={isDragActive ? { scale: 1.1 } : { scale: 1 }}
+                      className="flex flex-col items-center gap-4"
+                    >
+                      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-600/20 to-cyan-500/20 border border-violet-500/30 flex items-center justify-center">
+                        <Upload className={`w-9 h-9 ${isDragActive ? 'text-cyan-400' : 'text-violet-400'} transition-colors`} />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-lg mb-1">
+                          {isDragActive ? 'Drop it here!' : 'Drag & drop your video'}
+                        </p>
+                        <p className="text-slate-400 text-sm">or click to browse files</p>
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-2 mt-2">
+                        {['MP4', 'AVI', 'MOV', 'MKV', 'WebM'].map((fmt) => (
+                          <span key={fmt} className="tag tag-purple text-[10px]">{fmt}</span>
+                        ))}
+                      </div>
+                      <p className="text-slate-500 text-xs">Maximum file size: 100MB</p>
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="file-preview"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="glass-card p-5"
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Video thumbnail */}
+                      <div className="relative w-24 h-16 rounded-xl overflow-hidden bg-black/40 flex-shrink-0">
+                        {preview && (
+                          <video src={preview} className="w-full h-full object-cover" muted />
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Video className="w-6 h-6 text-white/60" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold truncate">{file.name}</p>
+                        <p className="text-slate-400 text-sm mt-0.5">{formatSize(file.size)}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <span className="text-emerald-400 text-xs font-medium">Ready for analysis</span>
+                        </div>
+                      </div>
+                      {!isProcessing && (
+                        <button
+                          onClick={removeFile}
+                          className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-all"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
-                    <div className="w-full h-2 bg-purple-900/50 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                      />
-                    </div>
-                  </div>
+                  </motion.div>
                 )}
+              </AnimatePresence>
+            </motion.div>
 
-                {/* Analyze Button */}
-                <button
-                  onClick={handleUpload}
+            {/* Settings */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="glass-card p-6"
+            >
+              <div className="flex items-center gap-2 mb-5">
+                <SlidersHorizontal className="w-4 h-4 text-violet-400" />
+                <h3 className="text-white font-semibold">Analysis Settings</h3>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-white text-sm font-medium">Frames to Analyze</p>
+                    <p className="text-slate-400 text-xs mt-0.5">More frames = higher accuracy but slower</p>
+                  </div>
+                  <span className="text-2xl font-black text-gradient">{numFrames}</span>
+                </div>
+                <input
+                  type="range"
+                  min={10}
+                  max={50}
+                  value={numFrames}
+                  onChange={(e) => setNumFrames(Number(e.target.value))}
                   disabled={isProcessing}
-                  className="w-full btn-primary flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                  className="w-full h-2 rounded-full appearance-none cursor-pointer disabled:opacity-50"
+                  style={{
+                    background: `linear-gradient(to right, #7c3aed ${((numFrames - 10) / 40) * 100}%, rgba(255,255,255,0.1) ${((numFrames - 10) / 40) * 100}%)`,
+                  }}
+                />
+                <div className="flex justify-between text-slate-500 text-xs mt-2">
+                  <span>10 (Fast)</span>
+                  <span>30 (Balanced)</span>
+                  <span>50 (Thorough)</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Analyze button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <button
+                onClick={handleAnalyze}
+                disabled={!file || isProcessing}
+                className="w-full py-5 rounded-2xl font-bold text-lg text-white transition-all duration-300 relative overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  background: 'linear-gradient(135deg, #7c3aed, #00d4ff)',
+                  boxShadow: file && !isProcessing ? '0 10px 40px rgba(124,58,237,0.4)' : 'none',
+                }}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-3">
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Analyzing Video...
+                      Analyzing...
                     </>
                   ) : (
-                    'Analyze Video'
+                    <>
+                      <Zap className="w-5 h-5" />
+                      Analyze for Deepfakes
+                    </>
                   )}
-                </button>
-              </div>
+                </span>
+              </button>
             </motion.div>
-          )}
-        </div>
+          </div>
 
-        {/* Info Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-8 glass-effect p-6"
-        >
-          <h3 className="text-lg font-semibold mb-4">What happens next?</h3>
-          <ul className="space-y-3 text-purple-200">
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400 font-bold">1.</span>
-              <span>Your video is securely uploaded and processed on our servers</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400 font-bold">2.</span>
-              <span>AI extracts frames and detects faces using advanced computer vision</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400 font-bold">3.</span>
-              <span>Deep learning model analyzes temporal patterns and facial features</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-purple-400 font-bold">4.</span>
-              <span>You receive a detailed report with confidence scores and visualizations</span>
-            </li>
-          </ul>
-        </motion.div>
-      </motion.div>
+          {/* Right: Status panel */}
+          <div className="lg:col-span-2">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="glass-card p-6 sticky top-24"
+            >
+              <h3 className="text-white font-semibold mb-5 flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-cyan-400 animate-pulse' : 'bg-slate-500'}`} />
+                Analysis Status
+              </h3>
+
+              {/* Progress */}
+              <AnimatePresence>
+                {isProcessing && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-6"
+                  >
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-slate-400">Progress</span>
+                      <span className="text-white font-bold">{Math.round(progress)}%</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div
+                        className="progress-bar h-full rounded-full"
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.5 }}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Stages */}
+              <div className="space-y-3">
+                {STAGES.map((s, i) => {
+                  const done = isProcessing && i < stage
+                  const active = isProcessing && i === stage
+                  const pending = !isProcessing || i > stage
+
+                  return (
+                    <div key={s.label} className="flex items-center gap-3">
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                          done
+                            ? 'bg-emerald-500/20 border border-emerald-500/40'
+                            : active
+                            ? 'bg-violet-500/20 border border-violet-500/40'
+                            : 'bg-white/5 border border-white/10'
+                        }`}
+                      >
+                        {done ? (
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : active ? (
+                          <Loader2 className="w-3.5 h-3.5 text-violet-400 animate-spin" />
+                        ) : (
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+                        )}
+                      </div>
+                      <span
+                        className={`text-sm transition-colors duration-300 ${
+                          done ? 'text-emerald-400' : active ? 'text-white font-medium' : 'text-slate-500'
+                        }`}
+                      >
+                        {s.label}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Info */}
+              {!isProcessing && (
+                <div className="mt-6 pt-5 border-t border-white/5 space-y-3">
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span>Make sure the Python backend is running on port 8000</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Supports MP4, AVI, MOV, MKV, WebM up to 100MB</span>
+                  </div>
+                  <div className="flex items-start gap-2 text-xs text-slate-400">
+                    <Zap className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                    <span>Average processing time: 3–8 seconds</span>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

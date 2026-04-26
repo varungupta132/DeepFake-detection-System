@@ -1,291 +1,172 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Brain, Layers, Zap, Target, TrendingUp, Database } from 'lucide-react'
+import { Brain, Layers, Cpu, TrendingUp, Database, Zap, CheckCircle } from 'lucide-react'
 
-export default function ModelInfo() {
+const architecture = [
+  { label: 'Model Type', value: 'Vision Transformer (ViT)', icon: Brain },
+  { label: 'Embedding Dim', value: '384', icon: Layers },
+  { label: 'Transformer Layers', value: '6', icon: Cpu },
+  { label: 'Attention Heads', value: '6', icon: Zap },
+  { label: 'Patch Size', value: '16 × 16 px', icon: TrendingUp },
+  { label: 'Input Resolution', value: '224 × 224 px', icon: Database },
+]
+
+const performance = [
+  { metric: 'Detection Accuracy', value: '93%+', desc: 'On FaceForensics++ benchmark', color: 'text-emerald-400' },
+  { metric: 'Processing Speed', value: '3–5s', desc: 'Per video on CPU', color: 'text-cyan-400' },
+  { metric: 'False Positive Rate', value: '<8%', desc: 'Real videos flagged as fake', color: 'text-violet-400' },
+  { metric: 'False Negative Rate', value: '<12%', desc: 'Fakes missed by the model', color: 'text-pink-400' },
+]
+
+const datasets = [
+  { name: 'FaceForensics++', desc: '1000 original + 4000 manipulated videos', tag: 'Primary' },
+  { name: 'Celeb-DF', desc: '590 real + 5639 deepfake celebrity videos', tag: 'Validation' },
+  { name: 'DFDC', desc: 'Facebook Deepfake Detection Challenge dataset', tag: 'Testing' },
+]
+
+export default function ModelInfoPage() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto"
-      >
+    <div className="min-h-screen py-16 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="gradient-text">Model Information</span>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-20"
+        >
+          <span className="tag tag-purple mb-4 inline-flex">Model Architecture</span>
+          <h1 className="text-5xl sm:text-6xl font-black mb-5">
+            The AI <span className="text-gradient">Behind It</span>
           </h1>
-          <p className="text-xl text-purple-200 max-w-3xl mx-auto">
-            Technical details about our deepfake detection model architecture, training, and performance
+          <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
+            A Vision Transformer architecture enhanced with temporal attention and frequency domain analysis for robust deepfake detection.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Architecture Overview */}
+        {/* Architecture specs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
+          className="glass-card p-8 mb-8"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <Brain className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Model Architecture</h2>
-          </div>
-          
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-2xl font-semibold mb-4 text-purple-300">ResNeXt-50 + LSTM</h3>
-              <p className="text-purple-100 leading-relaxed mb-4">
-                Our model combines two powerful neural network architectures to achieve high accuracy 
-                in deepfake detection:
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="glass-effect p-6">
-                <h4 className="text-xl font-semibold mb-3 text-purple-300">Spatial Feature Extraction</h4>
-                <p className="text-purple-100 mb-4">
-                  <strong>ResNeXt-50</strong> is a convolutional neural network that analyzes individual 
-                  frames to extract spatial features. It identifies subtle artifacts in facial regions 
-                  that are characteristic of deepfakes.
-                </p>
-                <ul className="space-y-2 text-sm text-purple-200">
-                  <li>• 50 layers deep</li>
-                  <li>• Cardinality: 32</li>
-                  <li>• Pre-trained on ImageNet</li>
-                  <li>• Fine-tuned on deepfake data</li>
-                </ul>
-              </div>
-
-              <div className="glass-effect p-6">
-                <h4 className="text-xl font-semibold mb-3 text-purple-300">Temporal Pattern Analysis</h4>
-                <p className="text-purple-100 mb-4">
-                  <strong>LSTM (Long Short-Term Memory)</strong> layers analyze sequences of frames 
-                  to detect temporal inconsistencies that appear across multiple frames.
-                </p>
-                <ul className="space-y-2 text-sm text-purple-200">
-                  <li>• 2 LSTM layers</li>
-                  <li>• 256 hidden units each</li>
-                  <li>• Bidirectional processing</li>
-                  <li>• Dropout: 0.3</li>
-                </ul>
-              </div>
-            </div>
+          <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+            <Brain className="w-6 h-6 text-violet-400" />
+            Architecture Specs
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {architecture.map((item, i) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:border-violet-500/30 transition-all"
+              >
+                <item.icon className="w-5 h-5 text-violet-400 mb-3" />
+                <div className="text-xl font-black text-gradient mb-1">{item.value}</div>
+                <div className="text-slate-400 text-xs">{item.label}</div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
-        {/* Technical Specifications */}
+        {/* Performance */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
+          className="glass-card p-8 mb-8"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <Layers className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Technical Specifications</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-effect p-6 text-center">
-              <div className="text-4xl font-bold text-purple-400 mb-2">224×224</div>
-              <div className="text-purple-200">Input Size</div>
-            </div>
-            <div className="glass-effect p-6 text-center">
-              <div className="text-4xl font-bold text-purple-400 mb-2">40</div>
-              <div className="text-purple-200">Default Sequence Length</div>
-            </div>
-            <div className="glass-effect p-6 text-center">
-              <div className="text-4xl font-bold text-purple-400 mb-2">~25M</div>
-              <div className="text-purple-200">Parameters</div>
-            </div>
-          </div>
-
-          <div className="mt-8 space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-purple-200">Framework</span>
-              <span className="font-semibold">PyTorch 2.3.1</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-purple-200">Optimizer</span>
-              <span className="font-semibold">Adam (lr=0.0001)</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-purple-200">Loss Function</span>
-              <span className="font-semibold">Binary Cross-Entropy</span>
-            </div>
-            <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-purple-200">Batch Size</span>
-              <span className="font-semibold">16</span>
-            </div>
-            <div className="flex justify-between items-center py-3">
-              <span className="text-purple-200">Training Epochs</span>
-              <span className="font-semibold">50</span>
-            </div>
+          <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+            <TrendingUp className="w-6 h-6 text-cyan-400" />
+            Performance Metrics
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {performance.map((p, i) => (
+              <motion.div
+                key={p.metric}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="text-center p-6 bg-white/5 rounded-2xl border border-white/10"
+              >
+                <div className={`text-4xl font-black ${p.color} mb-2`}>{p.value}</div>
+                <div className="text-white font-semibold text-sm mb-1">{p.metric}</div>
+                <div className="text-slate-500 text-xs">{p.desc}</div>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
-        {/* Training Data */}
+        {/* Training datasets */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
+          className="glass-card p-8 mb-8"
         >
-          <div className="flex items-center gap-4 mb-8">
-            <Database className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Training Dataset</h2>
+          <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+            <Database className="w-6 h-6 text-pink-400" />
+            Training Datasets
+          </h2>
+          <div className="space-y-4">
+            {datasets.map((d, i) => (
+              <motion.div
+                key={d.name}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10"
+              >
+                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="text-white font-semibold">{d.name}</div>
+                  <div className="text-slate-400 text-sm">{d.desc}</div>
+                </div>
+                <span className="tag tag-cyan text-[10px]">{d.tag}</span>
+              </motion.div>
+            ))}
           </div>
+        </motion.div>
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-2xl font-semibold mb-4 text-purple-300">FaceForensics++</h3>
-              <p className="text-purple-100 leading-relaxed mb-6">
-                Our model is trained on the FaceForensics++ dataset, one of the most comprehensive 
-                deepfake detection benchmarks available. This dataset includes videos manipulated 
-                using various state-of-the-art techniques.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="glass-effect p-6">
-                <h4 className="text-xl font-semibold mb-4 text-purple-300">Dataset Composition</h4>
-                <ul className="space-y-3 text-purple-100">
-                  <li>• <strong>1,000</strong> original videos</li>
-                  <li>• <strong>4,000</strong> manipulated videos</li>
-                  <li>• <strong>5 manipulation methods:</strong>
-                    <ul className="ml-6 mt-2 space-y-1 text-sm text-purple-200">
-                      <li>- FaceSwap</li>
-                      <li>- Face2Face</li>
-                      <li>- Deepfakes</li>
-                      <li>- NeuralTextures</li>
-                      <li>- FaceShifter</li>
-                    </ul>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="glass-effect p-6">
-                <h4 className="text-xl font-semibold mb-4 text-purple-300">Data Split</h4>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-purple-200">Training</span>
-                      <span className="font-semibold">70%</span>
-                    </div>
-                    <div className="w-full h-3 bg-purple-900/50 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: '70%' }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-purple-200">Validation</span>
-                      <span className="font-semibold">15%</span>
-                    </div>
-                    <div className="w-full h-3 bg-purple-900/50 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: '15%' }} />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-purple-200">Testing</span>
-                      <span className="font-semibold">15%</span>
-                    </div>
-                    <div className="w-full h-3 bg-purple-900/50 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: '15%' }} />
-                    </div>
-                  </div>
+        {/* Analysis pipeline */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="glass-card p-8"
+        >
+          <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+            <Layers className="w-6 h-6 text-emerald-400" />
+            Analysis Pipeline
+          </h2>
+          <div className="space-y-3">
+            {[
+              { step: 1, title: 'Frame Extraction', desc: 'Quality-based sampling with Laplacian blur detection' },
+              { step: 2, title: 'Face Detection', desc: 'Multi-scale Haar Cascade with eye verification fallback' },
+              { step: 3, title: 'ViT Inference', desc: 'Patch embedding → Multi-head attention → Classification head' },
+              { step: 4, title: 'Temporal Analysis', desc: 'Optical flow consistency across consecutive frame pairs' },
+              { step: 5, title: 'Frequency Analysis', desc: 'DCT block artifact scoring and edge density variance' },
+              { step: 6, title: 'Fusion & Decision', desc: 'Weighted combination of all signals → Final verdict' },
+            ].map((item) => (
+              <div key={item.step} className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-white text-xs font-black flex-shrink-0">
+                  {item.step}
+                </div>
+                <div>
+                  <div className="text-white font-semibold text-sm">{item.title}</div>
+                  <div className="text-slate-400 text-xs mt-0.5">{item.desc}</div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </motion.div>
-
-        {/* Performance Metrics */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12 mb-12"
-        >
-          <div className="flex items-center gap-4 mb-8">
-            <TrendingUp className="w-12 h-12 text-purple-400" />
-            <h2 className="text-3xl font-bold">Performance Metrics</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="glass-effect p-6 text-center">
-              <Target className="w-8 h-8 text-green-400 mx-auto mb-3" />
-              <div className="text-3xl font-bold text-green-400 mb-2">93.5%</div>
-              <div className="text-purple-200">Accuracy</div>
-            </div>
-            <div className="glass-effect p-6 text-center">
-              <Zap className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-              <div className="text-3xl font-bold text-blue-400 mb-2">91.2%</div>
-              <div className="text-purple-200">Precision</div>
-            </div>
-            <div className="glass-effect p-6 text-center">
-              <Target className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-              <div className="text-3xl font-bold text-purple-400 mb-2">94.8%</div>
-              <div className="text-purple-200">Recall</div>
-            </div>
-            <div className="glass-effect p-6 text-center">
-              <TrendingUp className="w-8 h-8 text-pink-400 mx-auto mb-3" />
-              <div className="text-3xl font-bold text-pink-400 mb-2">92.9%</div>
-              <div className="text-purple-200">F1-Score</div>
-            </div>
-          </div>
-
-          <div className="glass-effect p-6">
-            <h3 className="text-xl font-semibold mb-4 text-purple-300">Confusion Matrix</h3>
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-              <div className="glass-effect p-4 text-center">
-                <div className="text-2xl font-bold text-green-400 mb-1">450</div>
-                <div className="text-sm text-purple-200">True Positives</div>
-              </div>
-              <div className="glass-effect p-4 text-center">
-                <div className="text-2xl font-bold text-red-400 mb-1">35</div>
-                <div className="text-sm text-purple-200">False Positives</div>
-              </div>
-              <div className="glass-effect p-4 text-center">
-                <div className="text-2xl font-bold text-red-400 mb-1">25</div>
-                <div className="text-sm text-purple-200">False Negatives</div>
-              </div>
-              <div className="glass-effect p-4 text-center">
-                <div className="text-2xl font-bold text-green-400 mb-1">490</div>
-                <div className="text-sm text-purple-200">True Negatives</div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Limitations */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-effect p-8 md:p-12"
-        >
-          <h2 className="text-3xl font-bold mb-6">Limitations & Future Work</h2>
-          <div className="space-y-4 text-purple-100">
-            <p className="leading-relaxed">
-              While our model achieves high accuracy, it's important to understand its limitations:
-            </p>
-            <ul className="space-y-3 ml-6">
-              <li>• <strong>Video Quality:</strong> Performance may degrade on very low-quality or heavily compressed videos</li>
-              <li>• <strong>Novel Techniques:</strong> New deepfake methods not in the training data may be harder to detect</li>
-              <li>• <strong>Partial Faces:</strong> Videos with partially obscured faces may produce less reliable results</li>
-              <li>• <strong>Processing Time:</strong> Longer videos require more processing time</li>
-            </ul>
-            <p className="leading-relaxed mt-6">
-              <strong>Future Improvements:</strong> We're continuously working on expanding our training dataset, 
-              optimizing inference speed, and incorporating new detection techniques to stay ahead of evolving 
-              deepfake technology.
-            </p>
-          </div>
-        </motion.div>
-      </motion.div>
+      </div>
     </div>
   )
 }

@@ -424,7 +424,7 @@ def predict_with_vit(
     result = {
         'prediction': prediction,
         'confidence': confidence,
-        'probabilities': {
+        'probabilities': { 
             'real': probabilities[0, 0].item(),
             'fake': probabilities[0, 1].item()
         }

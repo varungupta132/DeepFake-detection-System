@@ -1,108 +1,88 @@
 'use client'
 
 import Link from 'next/link'
-import { Brain, Github, Linkedin, Mail } from 'lucide-react'
+import { Shield, Github, Twitter, Mail, Heart } from 'lucide-react'
 
 export default function Footer() {
+  const year = new Date().getFullYear()
+
   return (
-    <footer className="glass-effect border-t border-white/10 mt-20">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="relative mt-24 border-t border-white/5">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
+          <div className="md:col-span-2">
+            <Link href="/" className="flex items-center gap-3 mb-5 group w-fit">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold">Deepfake Detector</span>
-            </div>
-            <p className="text-purple-200 mb-4 max-w-md">
-              Advanced AI-powered deepfake detection system using state-of-the-art deep learning 
-              to protect digital authenticity and combat misinformation.
+              <span className="text-lg font-black text-gradient">DeepGuard AI</span>
+            </Link>
+            <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
+              Next-generation deepfake detection powered by Vision Transformer and multi-modal AI analysis. Protecting digital authenticity.
             </p>
-            <div className="flex gap-4">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 glass-effect rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 glass-effect rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a
-                href="mailto:contact@example.com"
-                className="w-10 h-10 glass-effect rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors"
-              >
-                <Mail className="w-5 h-5" />
-              </a>
+            <div className="flex gap-3">
+              {[
+                { icon: Github, href: 'https://github.com', label: 'GitHub' },
+                { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
+                { icon: Mail, href: 'mailto:contact@deepguard.ai', label: 'Email' },
+              ].map(({ icon: Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 glass rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:border-violet-500/50 transition-all duration-200"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-purple-200 hover:text-white transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/how-it-works" className="text-purple-200 hover:text-white transition-colors">
-                  How It Works
-                </Link>
-              </li>
-              <li>
-                <Link href="/model-info" className="text-purple-200 hover:text-white transition-colors">
-                  Model Info
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-purple-200 hover:text-white transition-colors">
-                  About
-                </Link>
-              </li>
+            <h4 className="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Navigation</h4>
+            <ul className="space-y-3">
+              {[
+                { href: '/', label: 'Home' },
+                { href: '/how-it-works', label: 'How It Works' },
+                { href: '/model-info', label: 'Model Info' },
+                { href: '/about', label: 'About' },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href} className="text-slate-400 hover:text-white text-sm transition-colors duration-200">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Tech */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#" className="text-purple-200 hover:text-white transition-colors">
-                  Documentation
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-purple-200 hover:text-white transition-colors">
-                  API Reference
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-purple-200 hover:text-white transition-colors">
-                  Research Paper
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-purple-200 hover:text-white transition-colors">
-                  Privacy Policy
-                </a>
-              </li>
+            <h4 className="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Tech Stack</h4>
+            <ul className="space-y-3">
+              {['Next.js 14', 'FastAPI', 'PyTorch', 'Vision Transformer', 'OpenCV', 'TypeScript'].map((tech) => (
+                <li key={tech} className="text-slate-400 text-sm flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+                  {tech}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-8 pt-8 text-center text-purple-200">
-          <p>© {new Date().getFullYear()} Deepfake Detection System. Built with ❤️ for digital authenticity.</p>
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-slate-500 text-sm flex items-center gap-1.5">
+            © {year} DeepGuard AI. Built with <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" /> for digital truth.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-slate-500 text-xs">All systems operational</span>
+          </div>
         </div>
       </div>
     </footer>
