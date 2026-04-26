@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepGuard AI — Deepfake Detection</title>
+  <meta name="description" content="Advanced AI-powered deepfake detection. Upload any video and get instant analysis with confidence scores and detailed signal breakdown." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-scene">
+  <div class="grid-overlay"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M16 2L4 8v8c0 7.18 5.16 13.9 12 15.5C22.84 29.9 28 23.18 28 16V8L16 2z" fill="url(#shieldGrad)" opacity="0.9"/>
+        <path d="M16 2L4 8v8c0 7.18 5.16 13.9 12 15.5C22.84 29.9 28 23.18 28 16V8L16 2z" fill="none" stroke="url(#shieldStroke)" stroke-width="1.5"/>
+        <path d="M11 16l3.5 3.5L21 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="shieldGrad" x1="4" y1="2" x2="28" y2="31.5" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#7c3aed"/>
+            <stop offset="1" stop-color="#00d4ff"/>
+          </linearGradient>
+          <linearGradient id="shieldStroke" x1="4" y1="2" x2="28" y2="31.5" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#9d5cf6"/>
+            <stop offset="1" stop-color="#00d4ff"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">DeepGuard <span>AI</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#" onclick="showView('landing'); return false;">Home</a></li>
+      <li><a href="pages/technology.html">Technology</a></li>
+      <li><a href="pages/model.html">Model</a></li>
+      <li><a href="pages/about.html">About</a></li>
+      <li><a href="#" class="nav-cta" onclick="showView('upload'); return false;">Analyze Video</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="#" onclick="showView('landing'); closeMobileMenu(); return false;">Home</a></li>
+    <li><a href="pages/technology.html">Technology</a></li>
+    <li><a href="pages/model.html">Model</a></li>
+    <li><a href="pages/about.html">About</a></li>
+    <li><a href="#" onclick="showView('upload'); closeMobileMenu(); return false;">Analyze Video →</a></li>
+  </ul>
+</div>
+
+<!-- App Container -->
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LANDING VIEW                                           -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="view-landing" class="view active">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="dot"></span>
+            AI-Powered Detection Engine
+          </div>
+          <h1>
+            Detect Deepfakes<br/>
+            <span class="text-gradient">With Confidence</span>
+          </h1>
+          <p>
+            DeepGuard AI uses a fusion of TensorFlow MobileNetV2 and 6-signal computer vision analysis to identify manipulated video content with industry-leading accuracy.
+          </p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="showView('upload')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Analyze a Video</span>
+            </button>
+            <a href="pages/technology.html" class="btn-secondary">
+              <span>How It Works</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
+
+          <!-- Scan Visual -->
+          <div class="scan-visual">
+            <div class="scan-ring"></div>
+            <div class="scan-ring"></div>
+            <div class="scan-ring"></div>
+            <div class="scan-center">
+              <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
+                <path d="M16 2L4 8v8c0 7.18 5.16 13.9 12 15.5C22.84 29.9 28 23.18 28 16V8L16 2z" fill="url(#sg2)" opacity="0.8"/>
+                <path d="M11 16l3.5 3.5L21 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                  <linearGradient id="sg2" x1="4" y1="2" x2="28" y2="31.5" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#7c3aed"/><stop offset="1" stop-color="#00d4ff"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="scan-line"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-section">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="glass-card stat-card">
+            <div class="stat-number text-gradient">97.3%</div>
+            <div class="stat-label">Detection Accuracy</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-number text-cyan">6</div>
+            <div class="stat-label">Signal Fusion Channels</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-number text-violet">&lt;5s</div>
+            <div class="stat-label">Average Analysis Time</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-number text-gradient">MobileNetV2</div>
+            <div class="stat-label">Core AI Architecture</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="tag tag-purple" style="margin-bottom:16px">Core Capabilities</div>
+          <h2>Multi-Layer <span class="text-gradient">Detection Engine</span></h2>
+          <p>Every video is analyzed across multiple dimensions to ensure no manipulation goes undetected.</p>
+        </div>
+        <div class="features-grid">
+          <div class="glass-card feature-card">
+            <div class="feature-icon violet">🧠</div>
+            <h3>Deep Neural Analysis</h3>
+            <p>TensorFlow MobileNetV2 processes extracted frames through a fine-tuned classification pipeline trained on thousands of real and synthetic videos.</p>
+          </div>
+          <div class="glass-card feature-card">
+            <div class="feature-icon cyan">📊</div>
+            <h3>6-Signal CV Fusion</h3>
+            <p>Temporal consistency, compression artifacts, face quality, edge consistency, color distribution, and motion naturalness are all scored independently.</p>
+          </div>
+          <div class="glass-card feature-card">
+            <div class="feature-icon pink">⚡</div>
+            <h3>Real-Time Processing</h3>
+            <p>Intelligent frame sampling and parallel processing pipelines deliver results in seconds, not minutes — even for longer video clips.</p>
+          </div>
+          <div class="glass-card feature-card">
+            <div class="feature-icon green">🔍</div>
+            <h3>Detailed Reporting</h3>
+            <p>Every analysis produces a full breakdown with confidence scores, warning flags, video metadata, and per-signal metric bars.</p>
+          </div>
+          <div class="glass-card feature-card">
+            <div class="feature-icon violet">🛡️</div>
+            <h3>Suspicious Score</h3>
+            <p>A composite suspicion index aggregates all signals into a single risk score, making it easy to triage results at a glance.</p>
+          </div>
+          <div class="glass-card feature-card">
+            <div class="feature-icon cyan">🎯</div>
+            <h3>Warning Flags</h3>
+            <p>Specific anomalies are surfaced as human-readable warning flags — so you know exactly what triggered the detection.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="tag tag-cyan" style="margin-bottom:16px">Process</div>
+          <h2>How <span class="text-gradient">DeepGuard</span> Works</h2>
+          <p>A four-stage pipeline from upload to verdict in seconds.</p>
+        </div>
+        <div class="steps-grid">
+          <div class="glass-card step-card">
+            <div class="step-number">1</div>
+            <h3>Upload Video</h3>
+            <p>Drag and drop or select any MP4, MOV, AVI, or WebM file up to 100MB.</p>
+          </div>
+          <div class="glass-card step-card">
+            <div class="step-number">2</div>
+            <h3>Frame Extraction</h3>
+            <p>Key frames are intelligently sampled and faces are detected and isolated for analysis.</p>
+          </div>
+          <div class="glass-card step-card">
+            <div class="step-number">3</div>
+            <h3>AI Analysis</h3>
+            <p>MobileNetV2 and 6 computer vision signals run in parallel across all extracted frames.</p>
+          </div>
+          <div class="glass-card step-card">
+            <div class="step-number">4</div>
+            <h3>Verdict Report</h3>
+            <p>Results are fused into a final REAL/FAKE verdict with full confidence breakdown and warning flags.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-box">
+          <div class="tag tag-cyan" style="margin-bottom:20px">Free Analysis</div>
+          <h2>Ready to <span class="text-gradient">Verify a Video?</span></h2>
+          <p>Upload any video file and get a full deepfake analysis report in seconds.</p>
+          <button class="btn-primary" onclick="showView('upload')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Start Analysis</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-inner">
+        <a href="index.html" class="footer-logo">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+            <path d="M16 2L4 8v8c0 7.18 5.16 13.9 12 15.5C22.84 29.9 28 23.18 28 16V8L16 2z" fill="url(#fg1)"/>
+            <path d="M11 16l3.5 3.5L21 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs><linearGradient id="fg1" x1="4" y1="2" x2="28" y2="31.5" gradientUnits="userSpaceOnUse"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#00d4ff"/></linearGradient></defs>
+          </svg>
+          DeepGuard AI
+        </a>
+        <div class="footer-links">
+          <a href="pages/technology.html">Technology</a>
+          <a href="pages/model.html">Model</a>
+          <a href="pages/about.html">About</a>
+        </div>
+        <div class="footer-copy">© 2024 DeepGuard AI. All rights reserved.</div>
+      </div>
+    </footer>
+
+  </div><!-- /view-landing -->
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- UPLOAD VIEW                                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="view-upload" class="view">
+    <div class="container">
+      <div class="upload-header">
+        <div class="tag tag-cyan" style="margin-bottom:16px">Analysis</div>
+        <h2>Upload Your <span class="text-gradient">Video</span></h2>
+        <p>Supports MP4, MOV, AVI, WebM — up to 100MB</p>
+      </div>
+
+      <div class="upload-container">
+        <!-- Drop Zone -->
+        <div class="upload-zone glass" id="uploadZone">
+          <div class="upload-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h3>Drop your video here</h3>
+          <p>or click to browse files</p>
+          <div class="tag tag-purple">MP4 · MOV · AVI · WebM · Max 100MB</div>
+          <input type="file" id="fileInput" accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,video/avi,.mp4,.mov,.avi,.webm" />
+        </div>
+
+        <!-- File Info -->
+        <div class="file-info" id="fileInfo">
+          <svg class="file-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <div>
+            <div class="file-info-name" id="fileName">video.mp4</div>
+            <div class="file-info-size" id="fileSize">0 MB</div>
+          </div>
+          <button class="file-remove" id="fileRemove" aria-label="Remove file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <!-- Actions -->
+        <div class="upload-actions">
+          <button class="btn-secondary" onclick="showView('landing')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            <span>Back</span>
+          </button>
+          <button class="btn-primary" id="analyzeBtn" onclick="startAnalysis()" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Analyze Video</span>
+          </button>
+        </div>
+
+        <!-- Progress Panel -->
+        <div class="progress-panel glass" id="progressPanel">
+          <h3>Processing your video...</h3>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+          </div>
+          <div class="stage-list" id="stageList">
+            <div class="stage-item" data-stage="0">
+              <div class="stage-icon"></div>
+              <span>Uploading video</span>
+            </div>
+            <div class="stage-item" data-stage="1">
+              <div class="stage-icon"></div>
+              <span>Extracting frames</span>
+            </div>
+            <div class="stage-item" data-stage="2">
+              <div class="stage-icon"></div>
+              <span>Detecting faces</span>
+            </div>
+            <div class="stage-item" data-stage="3">
+              <div class="stage-icon"></div>
+              <span>Running AI analysis</span>
+            </div>
+            <div class="stage-item" data-stage="4">
+              <div class="stage-icon"></div>
+              <span>Generating report</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /view-upload -->
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- RESULTS VIEW                                           -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="view-results" class="view">
+    <div class="container">
+      <div class="results-header">
+        <div class="tag tag-cyan" style="margin-bottom:16px">Analysis Complete</div>
+        <h2>Detection <span class="text-gradient">Results</span></h2>
+        <p>Full breakdown of all signals and confidence scores</p>
+      </div>
+
+      <div class="results-grid" id="resultsGrid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="results-actions">
+        <button class="btn-primary" onclick="showView('landing')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          <span>New Analysis</span>
+        </button>
+      </div>
+    </div>
+  </div><!-- /view-results -->
+
+</div><!-- /app -->
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
