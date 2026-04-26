@@ -43,7 +43,7 @@ export default function Navbar() {
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyan-400 rounded-full animate-pulse" />
             </div>
             <div>
-              <span className="text-lg font-black text-gradient">DeepGuard</span>
+              <span className="text-lg font-black text-gradient">DeepScan</span>
               <span className="block text-[10px] text-slate-400 -mt-1 font-medium tracking-widest uppercase">AI Detection</span>
             </div>
           </Link>

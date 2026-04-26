@@ -8,11 +8,11 @@ import { Toaster } from 'react-hot-toast'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'DeepGuard AI — Deepfake Detection System',
+  title: 'DeepScan AI — Deepfake Detection System',
   description: 'Next-generation AI-powered deepfake detection using Vision Transformer + Temporal Analysis. Detect manipulated videos with 93%+ accuracy.',
   keywords: 'deepfake detection, AI video analysis, fake video detector, vision transformer',
   openGraph: {
-    title: 'DeepGuard AI — Deepfake Detection',
+    title: 'DeepScan AI — Deepfake Detection',
     description: 'Detect deepfake videos with AI precision',
     type: 'website',
   },

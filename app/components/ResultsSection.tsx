@@ -80,7 +80,7 @@ export default function ResultsSection({ result, onReset }: Props) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `deepguard-report-${Date.now()}.json`
+    a.download = `deepscan-report-${Date.now()}.json`
     a.click()
     URL.revokeObjectURL(url)
   }

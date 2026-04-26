@@ -17,7 +17,7 @@ export default function Footer() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center">
                 <Shield className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-black text-gradient">DeepGuard AI</span>
+              <span className="text-lg font-black text-gradient">DeepScan AI</span>
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
               Next-generation deepfake detection powered by Vision Transformer and multi-modal AI analysis. Protecting digital authenticity.
@@ -77,7 +77,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-slate-500 text-sm flex items-center gap-1.5">
-            © {year} DeepGuard AI. Built with <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" /> for digital truth.
+            © {year} DeepScan AI. Built with <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" /> for digital truth.
           </p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

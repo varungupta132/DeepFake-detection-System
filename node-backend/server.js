@@ -1,5 +1,5 @@
 /**
- * DeepGuard AI — Node.js + Express Backend
+ * DeepScan AI — Node.js + Express Backend
  * Receives video upload → calls Python detector → returns JSON result
  */
 
@@ -56,7 +56,7 @@ const upload = multer({
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({
-    name:    'DeepGuard AI',
+    name:    'DeepScan AI',
     version: '9.0.0',
     stack:   'Node.js + Express + Python CV/ML',
     status:  'running',
@@ -151,7 +151,7 @@ app.use((err, req, res, next) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
   console.log('\n' + '='.repeat(55));
-  console.log('  🛡  DeepGuard AI — Node.js + Express Backend v9.0');
+  console.log('  🛡  DeepScan AI — Node.js + Express Backend v9.0');
   console.log(`  🔗  http://0.0.0.0:${PORT}`);
   console.log('='.repeat(55) + '\n');
 });

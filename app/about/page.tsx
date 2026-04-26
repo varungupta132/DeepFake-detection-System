@@ -46,7 +46,7 @@ export default function AboutPage() {
             Fighting <span className="text-gradient">Digital Deception</span>
           </h1>
           <p className="text-slate-400 text-xl max-w-2xl mx-auto leading-relaxed">
-            DeepGuard AI is an open-source deepfake detection system built to protect digital authenticity and combat AI-generated misinformation.
+            DeepScan AI is an open-source deepfake detection system built to protect digital authenticity and combat AI-generated misinformation.
           </p>
         </motion.div>
 
@@ -77,7 +77,7 @@ export default function AboutPage() {
         >
           <h2 className="text-3xl font-black text-white mb-6 flex items-center gap-3">
             <Users className="w-6 h-6 text-cyan-400" />
-            Who Uses DeepGuard?
+            Who Uses DeepScan?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {useCases.map((uc, i) => (

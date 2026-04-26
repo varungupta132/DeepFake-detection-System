@@ -1,5 +1,5 @@
 """
-DeepGuard AI — FastAPI Backend
+DeepScan AI — FastAPI Backend
 TensorFlow + OpenCV multi-signal deepfake detection
 No PyTorch, no frames preview in response
 """
@@ -35,7 +35,7 @@ ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".wmv", ".mpeg", 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("\n" + "=" * 55)
-    print("  🛡  DeepGuard AI — Backend v5.0")
+    print("  🛡  DeepScan AI — Backend v5.0")
     print("  🔗  http://0.0.0.0:8000")
     print("  📚  Docs: http://0.0.0.0:8000/docs")
     print("=" * 55 + "\n")
@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="DeepGuard AI API",
+    title="DeepScan AI API",
     description="TensorFlow + OpenCV deepfake detection — no PyTorch required",
     version="5.0.0",
     lifespan=lifespan,
@@ -76,7 +76,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {
-        "name": "DeepGuard AI",
+        "name": "DeepScan AI",
         "version": "5.0.0",
         "status": "running",
         "stack": "TensorFlow + OpenCV (no PyTorch)",

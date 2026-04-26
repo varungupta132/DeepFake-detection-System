@@ -1,5 +1,5 @@
 /* ============================================================
-   DeepGuard AI — API Configuration
+   DeepScan AI — API Configuration
    Change BACKEND_URL to your deployed backend URL
    ============================================================ */
 

@@ -1,5 +1,5 @@
 """
-DeepGuard AI — Detector v8.0
+DeepScan AI — Detector v8.0
 
 Honest approach:
   We do NOT have a trained deepfake classifier.
