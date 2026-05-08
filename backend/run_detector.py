@@ -1,6 +1,6 @@
 """
 run_detector.py — Called by Node.js server via child_process.spawn
-Usage: python run_detector.py <video_path>
+Usage: python run_detector.py <video_path> [num_frames]
 Output: prints JSON result to stdout (last line)
 """
 
@@ -12,11 +12,13 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 video_path = sys.argv[1]
+num_frames = int(sys.argv[2]) if len(sys.argv) > 2 else 30
+# Clamp between 10 and 60
+num_frames = max(10, min(60, num_frames))
 
 try:
     from detector import analyze_video
-    result = analyze_video(video_path)
-    # Print JSON as last line — Node.js reads this
+    result = analyze_video(video_path, num_frames=num_frames)
     print(json.dumps(result))
 except Exception as e:
     print(json.dumps({

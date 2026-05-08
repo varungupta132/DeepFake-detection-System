@@ -224,8 +224,10 @@ async function startAnalysis() {
 }
 
 async function fetchPrediction(file) {
+  const frameCount = parseInt(document.getElementById('frameSlider')?.value || '30');
   const formData = new FormData();
   formData.append('upload_video_file', file);
+  formData.append('num_frames', frameCount.toString());
 
   const response = await fetch((window.CONFIG?.BACKEND_URL || 'http://localhost:8000') + '/api/predict/', {
     method: 'POST',

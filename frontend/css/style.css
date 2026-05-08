@@ -969,3 +969,58 @@ footer {
   line-height: 1;
   margin-bottom: 16px;
 }
+
+/* ── Frame Slider ── */
+.frame-slider-wrap {
+  padding: 20px 24px;
+  margin-top: 16px;
+  border-radius: var(--radius);
+}
+.frame-slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.frame-slider-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.frame-slider-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.frame-count-badge {
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--violet-light), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  min-width: 40px;
+  text-align: right;
+}
+.frame-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(124,58,237,0.5);
+}

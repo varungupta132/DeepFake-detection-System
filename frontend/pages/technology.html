@@ -85,51 +85,54 @@
 
       <!-- Neural Network -->
       <div class="page-section">
-        <h2>TensorFlow MobileNetV2 Core</h2>
+        <h2>EfficientNet-B4 Feature Extractor</h2>
         <p>
-          The primary classifier is built on MobileNetV2, a lightweight convolutional architecture optimized for
-          efficient inference. The model is fine-tuned on a curated dataset of real and synthetically generated
-          video frames, learning to distinguish authentic facial textures from AI-generated ones.
+          The primary AI component is EfficientNet-B4, a convolutional neural network pretrained on ImageNet
+          (1.2 million images, 1000 classes). It is used as a <strong>feature extractor</strong> — not trained
+          on deepfake data, but its rich visual representations are used to measure frame-to-frame consistency.
         </p>
         <p>
-          Key advantages of MobileNetV2 for this task:
+          Each face crop is converted into a 1792-dimensional feature vector. Cosine similarity between
+          consecutive frame vectors detects GAN instability — real videos have stable features (0.90–0.99),
+          deepfakes have erratic features (0.65–0.85) because GANs regenerate each frame independently.
         </p>
         <ul>
-          <li>Inverted residual blocks preserve gradient flow through deep layers</li>
-          <li>Depthwise separable convolutions reduce compute without sacrificing accuracy</li>
-          <li>Linear bottlenecks prevent information loss in low-dimensional feature spaces</li>
-          <li>Fast inference enables real-time frame-by-frame analysis</li>
+          <li>Architecture: EfficientNet-B4 (PyTorch, timm library)</li>
+          <li>Parameters: 19 million</li>
+          <li>Input: 224×224 RGB face crops</li>
+          <li>Output: 1792-dim feature vector per frame</li>
+          <li>Weight: 45% of final suspicion score</li>
         </ul>
       </div>
 
-      <!-- 6 Signals -->
+      <!-- 5 Signals -->
       <div class="page-section">
-        <h2>6-Signal Computer Vision Fusion</h2>
-        <p>Each of the six signals is computed independently and contributes to the final suspicion index.</p>
+        <h2>5-Signal Computer Vision Fusion</h2>
+        <p>Each signal is computed independently using OpenCV and contributes to the final suspicion score.</p>
         <div class="tech-grid">
           <div class="glass-card tech-item">
-            <h4>Temporal Consistency</h4>
-            <p>Measures frame-to-frame coherence. Deepfakes often introduce subtle flickering or discontinuities between frames that are invisible to the naked eye but detectable statistically.</p>
+            <h4>Signal 1 — EfficientNet Deep Features (45%)</h4>
+            <p>Cosine similarity between consecutive frame feature vectors. Real: mean_sim 0.90–0.99, std &lt; 0.05. Deepfake: mean_sim &lt; 0.78 AND std &gt; 0.06 triggers suspicion.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Compression Artifacts</h4>
-            <p>Analyzes DCT block boundaries and quantization noise patterns. AI-generated content frequently exhibits atypical compression signatures when re-encoded.</p>
+            <h4>Signal 2 — Texture Variance / Laplacian (20%)</h4>
+            <p>Laplacian operator measures face sharpness per frame. Coefficient of variation &gt; 0.55 or mean sharpness &lt; 80 indicates inconsistent texture — a deepfake artifact.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Face Quality</h4>
-            <p>Scores facial region sharpness, symmetry, and landmark consistency. Synthesized faces often have subtle asymmetries or blurring at the hairline and ear boundaries.</p>
+            <h4>Signal 3 — Face Blend Seam / Sobel (15%)</h4>
+            <p>Sobel gradient at face boundary. Border-to-inner gradient ratio &gt; 2.0 indicates a blending seam — the signature of face-swap deepfakes where a face is pasted onto a body.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Edge Consistency</h4>
-            <p>Examines gradient transitions at face-background boundaries. Blending artifacts from face-swap operations leave characteristic edge signatures.</p>
+            <h4>Signal 4 — Color Mismatch / LAB (15%)</h4>
+            <p>LAB color space comparison between face region and background. Difference &gt; 0.25 indicates the face came from a different source with different lighting or camera.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Color Distribution</h4>
-            <p>Compares color histograms and skin tone distributions across frames. Deepfake generators sometimes produce subtle color shifts or inconsistent lighting.</p>
+            <h4>Signal 5 — Temporal Flicker (5%)</h4>
+            <p>Frame-to-frame pixel difference coefficient of variation. Real: CV 0.15–0.65. Deepfake: CV &gt; 0.85 (erratic GAN output) or &lt; 0.08 (frozen/static face).</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Motion Naturalness</h4>
-            <p>Evaluates optical flow patterns against models of natural human motion. Synthetic videos can exhibit unnatural micro-movements or overly smooth motion trajectories.</p>
+            <h4>Weighted Fusion</h4>
+            <p>Suspicion = S1×0.45 + S2×0.20 + S3×0.15 + S4×0.15 + S5×0.05. Face weight = 1.0 if face detected, 0.4 if not. Threshold 38 → FAKE, below → REAL.</p>
           </div>
         </div>
       </div>
@@ -137,16 +140,14 @@
       <!-- Pipeline -->
       <div class="page-section">
         <h2>Processing Pipeline</h2>
-        <p>
-          When a video is submitted, the backend executes the following pipeline:
-        </p>
+        <p>When a video is submitted, the backend executes the following pipeline:</p>
         <ul>
-          <li><strong>Frame Extraction:</strong> Intelligent sampling selects representative frames, balancing coverage and compute cost.</li>
-          <li><strong>Face Detection:</strong> A face detector isolates facial regions for targeted analysis.</li>
-          <li><strong>Parallel Signal Computation:</strong> All six CV signals are computed concurrently across extracted frames.</li>
-          <li><strong>Neural Inference:</strong> MobileNetV2 runs on each frame and scores are aggregated.</li>
-          <li><strong>Score Fusion:</strong> Signal scores and neural outputs are combined using a weighted fusion model.</li>
-          <li><strong>Verdict Generation:</strong> The fused score is thresholded to produce a REAL/FAKE verdict with confidence.</li>
+          <li><strong>Frame Extraction:</strong> User-selected number of frames (10–60) evenly sampled using np.linspace across the full video duration.</li>
+          <li><strong>Face Detection:</strong> OpenCV Haar Cascade (haarcascade_frontalface_default) isolates face regions with 20% padding. Falls back to center crop if no face found.</li>
+          <li><strong>EfficientNet Inference:</strong> PyTorch EfficientNet-B4 converts each 224×224 face crop to a 1792-dim feature vector. Cosine similarity computed between consecutive frames.</li>
+          <li><strong>CV Signal Computation:</strong> Laplacian sharpness, Sobel boundary gradient, LAB color mismatch, and temporal pixel difference computed on face crops.</li>
+          <li><strong>Weighted Fusion:</strong> Five signal scores combined with fixed weights into a suspicion score 0–100.</li>
+          <li><strong>Verdict:</strong> Suspicion ≥ 38 → FAKE. Confidence mapped from suspicion score range.</li>
         </ul>
       </div>
 

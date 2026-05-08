@@ -86,7 +86,7 @@
             <span class="text-gradient">With Confidence</span>
           </h1>
           <p>
-            DeepScan AI uses a fusion of TensorFlow MobileNetV2 and 6-signal computer vision analysis to identify manipulated video content with industry-leading accuracy.
+            DeepScan AI uses EfficientNet-B4 as a deep feature extractor combined with 5 OpenCV-based computer vision signals to detect manipulated video content with high accuracy.
           </p>
           <div class="hero-actions">
             <button class="btn-primary" onclick="showView('upload')">
@@ -126,19 +126,19 @@
       <div class="container">
         <div class="stats-grid">
           <div class="glass-card stat-card">
-            <div class="stat-number text-gradient">97.3%</div>
-            <div class="stat-label">Detection Accuracy</div>
+            <div class="stat-number text-gradient">5</div>
+            <div class="stat-label">Detection Signals</div>
           </div>
           <div class="glass-card stat-card">
-            <div class="stat-number text-cyan">6</div>
-            <div class="stat-label">Signal Fusion Channels</div>
+            <div class="stat-number text-cyan">19M</div>
+            <div class="stat-label">Model Parameters</div>
           </div>
           <div class="glass-card stat-card">
-            <div class="stat-number text-violet">&lt;5s</div>
-            <div class="stat-label">Average Analysis Time</div>
+            <div class="stat-number text-violet">100MB</div>
+            <div class="stat-label">Max File Size</div>
           </div>
           <div class="glass-card stat-card">
-            <div class="stat-number text-gradient">MobileNetV2</div>
+            <div class="stat-number text-gradient">EfficientNet</div>
             <div class="stat-label">Core AI Architecture</div>
           </div>
         </div>
@@ -156,33 +156,33 @@
         <div class="features-grid">
           <div class="glass-card feature-card">
             <div class="feature-icon violet">🧠</div>
-            <h3>Deep Neural Analysis</h3>
-            <p>TensorFlow MobileNetV2 processes extracted frames through a fine-tuned classification pipeline trained on thousands of real and synthetic videos.</p>
+            <h3>EfficientNet-B4 Deep Features</h3>
+            <p>PyTorch EfficientNet-B4 (pretrained on ImageNet) extracts 1792-dimensional feature vectors per frame. Cosine similarity between consecutive frames detects GAN instability.</p>
           </div>
           <div class="glass-card feature-card">
-            <div class="feature-icon cyan">📊</div>
-            <h3>6-Signal CV Fusion</h3>
-            <p>Temporal consistency, compression artifacts, face quality, edge consistency, color distribution, and motion naturalness are all scored independently.</p>
+            <div class="feature-icon cyan">🔬</div>
+            <h3>Texture Variance (Laplacian)</h3>
+            <p>Laplacian operator measures face sharpness across frames. Deepfakes often have inconsistent sharpness — some frames blurry, some sharp — detected via coefficient of variation.</p>
           </div>
           <div class="glass-card feature-card">
             <div class="feature-icon pink">⚡</div>
-            <h3>Real-Time Processing</h3>
-            <p>Intelligent frame sampling and parallel processing pipelines deliver results in seconds, not minutes — even for longer video clips.</p>
+            <h3>Face Blend Seam (Sobel)</h3>
+            <p>Sobel gradient operator detects blending seams at face boundaries. Face-swap deepfakes leave a sharp gradient discontinuity where the face was pasted onto the body.</p>
           </div>
           <div class="glass-card feature-card">
-            <div class="feature-icon green">🔍</div>
-            <h3>Detailed Reporting</h3>
-            <p>Every analysis produces a full breakdown with confidence scores, warning flags, video metadata, and per-signal metric bars.</p>
+            <div class="feature-icon green">🎨</div>
+            <h3>Color Mismatch (LAB)</h3>
+            <p>LAB color space comparison between face region and background. Deepfake faces pasted from different sources have mismatched brightness and color channels.</p>
           </div>
           <div class="glass-card feature-card">
-            <div class="feature-icon violet">🛡️</div>
-            <h3>Suspicious Score</h3>
-            <p>A composite suspicion index aggregates all signals into a single risk score, making it easy to triage results at a glance.</p>
+            <div class="feature-icon violet">📈</div>
+            <h3>Temporal Flicker</h3>
+            <p>Frame-to-frame pixel difference analysis on face crops. Real videos have smooth natural motion (CV 0.15–0.65). Deepfakes show erratic flickering (CV &gt; 0.9).</p>
           </div>
           <div class="glass-card feature-card">
             <div class="feature-icon cyan">🎯</div>
-            <h3>Warning Flags</h3>
-            <p>Specific anomalies are surfaced as human-readable warning flags — so you know exactly what triggered the detection.</p>
+            <h3>Weighted Fusion Verdict</h3>
+            <p>All 5 signals are combined using weighted averaging (EfficientNet 45%, Texture 20%, Blend 15%, Color 15%, Flicker 5%). Score ≥ 38 → FAKE, &lt; 38 → REAL.</p>
           </div>
         </div>
       </div>
@@ -210,7 +210,7 @@
           <div class="glass-card step-card">
             <div class="step-number">3</div>
             <h3>AI Analysis</h3>
-            <p>MobileNetV2 and 6 computer vision signals run in parallel across all extracted frames.</p>
+            <p>EfficientNet-B4 extracts deep features and 4 OpenCV signals (Laplacian, Sobel, LAB color, Temporal) run on face crops.</p>
           </div>
           <div class="glass-card step-card">
             <div class="step-number">4</div>
@@ -295,6 +295,25 @@
           <button class="file-remove" id="fileRemove" aria-label="Remove file">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
+        </div>
+
+        <!-- Frame Count Slider -->
+        <div class="frame-slider-wrap glass" id="frameSliderWrap">
+          <div class="frame-slider-header">
+            <div>
+              <div class="frame-slider-label">Frames to Analyze</div>
+              <div class="frame-slider-hint">More frames = higher accuracy but slower</div>
+            </div>
+            <span class="frame-count-badge" id="frameCountBadge">30</span>
+          </div>
+          <input type="range" id="frameSlider" min="10" max="60" value="30" step="5"
+            oninput="document.getElementById('frameCountBadge').textContent = this.value"
+            style="width:100%;margin-top:10px;accent-color:#7c3aed;cursor:pointer" />
+          <div class="frame-slider-labels">
+            <span>10 — Fast</span>
+            <span>30 — Balanced</span>
+            <span>60 — Thorough</span>
+          </div>
         </div>
 
         <!-- Actions -->

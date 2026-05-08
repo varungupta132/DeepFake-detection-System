@@ -82,10 +82,13 @@ app.post('/api/predict/', upload.single('upload_video_file'), async (req, res) =
   }
 
   const videoPath = req.file.path;
-  console.log(`\n📥 Received: ${req.file.originalname} (${(req.file.size / 1024 / 1024).toFixed(1)} MB)`);
+  const numFrames = parseInt(req.body.num_frames) || 30;
+  // Clamp between 10 and 60
+  const frames = Math.min(60, Math.max(10, numFrames));
+  console.log(`\n📥 Received: ${req.file.originalname} (${(req.file.size / 1024 / 1024).toFixed(1)} MB) | frames: ${frames}`);
 
   try {
-    const result = await runPythonDetector(videoPath);
+    const result = await runPythonDetector(videoPath, frames);
     res.json(result);
   } catch (err) {
     console.error('Detection error:', err);
@@ -97,15 +100,15 @@ app.post('/api/predict/', upload.single('upload_video_file'), async (req, res) =
 });
 
 // ── Python detector runner ────────────────────────────────────────────────────
-function runPythonDetector(videoPath) {
+function runPythonDetector(videoPath, numFrames) {
   return new Promise((resolve, reject) => {
     // Path to detector script (in ../backend/)
     const detectorScript = path.join(__dirname, '..', 'backend', 'run_detector.py');
     const pythonCmd      = process.platform === 'win32' ? 'python' : 'python3';
 
-    console.log(`  🐍 Running: ${pythonCmd} ${detectorScript} "${videoPath}"`);
+    console.log(`  🐍 Running: ${pythonCmd} ${detectorScript} "${videoPath}" ${numFrames}`);
 
-    const py = spawn(pythonCmd, [detectorScript, videoPath], {
+    const py = spawn(pythonCmd, [detectorScript, videoPath, String(numFrames)], {
       cwd: path.join(__dirname, '..', 'backend'),
     });
 

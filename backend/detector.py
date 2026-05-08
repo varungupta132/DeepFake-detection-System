@@ -418,10 +418,10 @@ def _info_motion_naturalness(frames: List[np.ndarray]) -> float:
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
-def analyze_video(video_path: str) -> Dict:
+def analyze_video(video_path: str, num_frames: int = 30) -> Dict:
     t0 = time.time()
 
-    frames, meta = _extract_frames(video_path, n=30)
+    frames, meta = _extract_frames(video_path, n=num_frames)
     if not frames:
         raise ValueError("Could not extract frames from video")
 

@@ -69,97 +69,78 @@
 
       <!-- Stats -->
       <div class="page-section">
-        <h2>Performance Benchmarks</h2>
-        <p>Evaluated on a held-out test set of real and AI-generated video clips across multiple generation methods.</p>
+        <h2>Model Specifications</h2>
+        <p>EfficientNet-B4 used as a pretrained feature extractor — not fine-tuned on deepfake data.</p>
         <div class="model-stat-grid">
           <div class="glass-card model-stat">
-            <div class="model-stat-num text-gradient">97.3%</div>
-            <div class="model-stat-label">Overall Accuracy</div>
+            <div class="model-stat-num text-gradient">EfficientNet-B4</div>
+            <div class="model-stat-label">Architecture</div>
           </div>
           <div class="glass-card model-stat">
-            <div class="model-stat-num text-cyan">96.8%</div>
-            <div class="model-stat-label">Precision</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-violet">97.1%</div>
-            <div class="model-stat-label">Recall</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-green">96.9%</div>
-            <div class="model-stat-label">F1 Score</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-cyan">3.4M</div>
+            <div class="model-stat-num text-cyan">19M</div>
             <div class="model-stat-label">Parameters</div>
           </div>
           <div class="glass-card model-stat">
-            <div class="model-stat-num text-gradient">&lt;5s</div>
-            <div class="model-stat-label">Avg. Inference</div>
+            <div class="model-stat-num text-violet">1792</div>
+            <div class="model-stat-label">Feature Vector Dim</div>
+          </div>
+          <div class="glass-card model-stat">
+            <div class="model-stat-num text-green">ImageNet</div>
+            <div class="model-stat-label">Pretrained On</div>
+          </div>
+          <div class="glass-card model-stat">
+            <div class="model-stat-num text-cyan">224×224</div>
+            <div class="model-stat-label">Input Resolution</div>
+          </div>
+          <div class="glass-card model-stat">
+            <div class="model-stat-num text-gradient">PyTorch</div>
+            <div class="model-stat-label">Framework</div>
           </div>
         </div>
       </div>
 
       <!-- Architecture -->
       <div class="page-section">
-        <h2>Model Architecture</h2>
+        <h2>How the Model is Used</h2>
         <p>
-          The core model is MobileNetV2 with a custom classification head fine-tuned for binary deepfake detection.
-          The architecture was chosen for its balance of accuracy and inference speed, making it suitable for
-          real-time video analysis without requiring GPU acceleration.
+          EfficientNet-B4 is used as a <strong>feature extractor only</strong> — it was not trained or fine-tuned
+          on deepfake data. The pretrained ImageNet weights provide rich visual representations that are
+          repurposed to measure temporal consistency across video frames.
         </p>
         <div class="tech-grid">
           <div class="glass-card tech-item">
-            <h4>Base: MobileNetV2</h4>
-            <p>Pre-trained on ImageNet, providing rich visual feature representations as a starting point for fine-tuning on deepfake-specific patterns.</p>
+            <h4>Feature Extraction</h4>
+            <p>The classification head is removed (num_classes=0). Each 224×224 face crop produces a 1792-dimensional feature vector representing visual content.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Custom Head</h4>
-            <p>Global average pooling → Dense(256, ReLU) → Dropout(0.3) → Dense(2, Softmax). Outputs real/fake probability distribution.</p>
+            <h4>Cosine Similarity</h4>
+            <p>dot(v1, v2) / (||v1|| × ||v2||) between consecutive frame vectors. Measures how similar adjacent frames are in feature space.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Input Resolution</h4>
-            <p>224×224 RGB frames. Face regions are cropped and resized before inference to focus the model on facial manipulation artifacts.</p>
+            <h4>Why EfficientNet-B4</h4>
+            <p>Best accuracy-to-parameter ratio among CNNs. 83% ImageNet top-1 accuracy with only 19M parameters — fast enough for CPU inference.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Aggregation</h4>
-            <p>Per-frame predictions are aggregated using a weighted mean, giving higher weight to frames with higher face detection confidence scores.</p>
+            <h4>Library: timm</h4>
+            <p>PyTorch Image Models (timm) library. Loaded with: timm.create_model("efficientnet_b4", pretrained=True, num_classes=0)</p>
           </div>
         </div>
       </div>
 
-      <!-- Training -->
+      <!-- Signal Fusion -->
       <div class="page-section">
-        <h2>Training Methodology</h2>
-        <p>
-          The model was trained using a two-phase approach:
-        </p>
-        <ul>
-          <li><strong>Phase 1 — Feature Extraction:</strong> The MobileNetV2 base was frozen and only the classification head was trained for 10 epochs, allowing the head to adapt to the deepfake detection task.</li>
-          <li><strong>Phase 2 — Fine-tuning:</strong> The top layers of the base were unfrozen and the entire model was trained end-to-end with a low learning rate (1e-5) for 20 additional epochs.</li>
-          <li><strong>Data Augmentation:</strong> Random horizontal flips, brightness/contrast jitter, and JPEG compression simulation were applied to improve robustness.</li>
-          <li><strong>Loss Function:</strong> Categorical cross-entropy with label smoothing (0.1) to prevent overconfident predictions.</li>
-          <li><strong>Optimizer:</strong> Adam with cosine learning rate decay schedule.</li>
-        </ul>
-      </div>
-
-      <!-- Fusion -->
-      <div class="page-section">
-        <h2>Signal Fusion Strategy</h2>
-        <p>
-          The neural model output is combined with the six CV signal scores using a learned weighted fusion.
-          Weights were determined through a grid search on a validation set, optimizing for F1 score.
-        </p>
-        <p>
-          The final suspicion score is computed as:
-        </p>
+        <h2>Signal Fusion Formula</h2>
+        <p>The EfficientNet score is combined with 4 OpenCV signals using fixed weights:</p>
         <div class="glass-card" style="padding:24px;margin:20px 0;font-family:monospace;font-size:0.9rem;color:var(--cyan)">
-          suspicion = 0.35 × tf_score + 0.15 × temporal + 0.12 × compression<br/>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.12 × face_quality + 0.10 × edge + 0.10 × color + 0.06 × motion
+          suspicious = S1×0.45 + S2×0.20 + S3×0.15×fw + S4×0.15×fw + S5×0.05<br/><br/>
+          S1 = EfficientNet cosine similarity score<br/>
+          S2 = Laplacian texture variance score<br/>
+          S3 = Sobel face blend seam score<br/>
+          S4 = LAB color mismatch score<br/>
+          S5 = Temporal flicker score<br/>
+          fw = face_weight (1.0 if face found, 0.4 if not)<br/><br/>
+          suspicious ≥ 38 → FAKE &nbsp;|&nbsp; suspicious &lt; 38 → REAL
         </div>
-        <p>
-          A suspicion score above 50 triggers a FAKE verdict. The confidence percentage reflects how far the
-          score is from the decision boundary, normalized to a 0–100% range.
-        </p>
       </div>
 
       <!-- Limitations -->
