@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Technology — DeepScan AI</title>
-  <meta name="description" content="Learn about the multi-signal AI technology powering DeepScan's deepfake detection engine." />
+  <meta name="description" content="Learn how DeepScan AI detects deepfake videos using AI and computer vision." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -19,7 +19,6 @@
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Navbar -->
 <nav class="navbar scrolled" id="navbar">
   <div class="nav-inner">
     <a href="../index.html" class="nav-logo">
@@ -35,7 +34,7 @@
       <li><a href="technology.html">Technology</a></li>
       <li><a href="model.html">Model</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="../index.html#upload" class="nav-cta" onclick="sessionStorage.setItem('goto','upload')">Analyze Video</a></li>
+      <li><a href="../index.html" class="nav-cta">Analyze Video</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Toggle menu">
       <span></span><span></span><span></span>
@@ -55,106 +54,112 @@
 
 <div id="app" style="position:relative;z-index:1">
 
-  <!-- Hero -->
   <section class="page-hero">
     <div class="container">
-      <div class="tag tag-cyan" style="margin-bottom:16px">Under the Hood</div>
+      <div class="tag tag-cyan" style="margin-bottom:16px">How It Works</div>
       <h1>The <span class="text-gradient">Technology</span></h1>
-      <p>A deep dive into the multi-signal fusion architecture that powers DeepScan's detection engine.</p>
+      <p>DeepScan AI uses a combination of deep learning and computer vision to analyze videos and detect signs of manipulation.</p>
     </div>
   </section>
 
-  <!-- Content -->
   <div class="page-content">
     <div class="container">
 
-      <!-- Overview -->
       <div class="page-section">
-        <h2>Detection Architecture</h2>
+        <h2>What Happens When You Upload a Video?</h2>
         <p>
-          DeepScan AI combines a fine-tuned deep neural network with six independent computer vision signal analyzers.
-          Each signal captures a different dimension of video authenticity — from pixel-level compression artifacts to
-          high-level temporal motion patterns. The outputs are fused into a single confidence score and verdict.
+          When you upload a video, DeepScan AI doesn't just look at one frame — it samples multiple frames
+          from across the entire video, finds faces in each frame, and runs five different checks on them.
+          Each check looks for a different type of manipulation. The results are combined into a single
+          score that determines whether the video is REAL or FAKE.
         </p>
         <p>
-          This hybrid approach outperforms single-model detectors because deepfake generation methods vary widely.
-          A GAN-based face swap may fool a temporal analyzer but leave compression artifacts; a diffusion-based
-          synthesis may pass artifact checks but fail face quality scoring. Fusion catches what any single signal misses.
+          The whole process takes between 10 and 40 seconds depending on video length and how many frames
+          you choose to analyze.
         </p>
       </div>
 
-      <!-- Neural Network -->
       <div class="page-section">
-        <h2>EfficientNet-B4 Feature Extractor</h2>
+        <h2>Step 1 — Frame Sampling</h2>
         <p>
-          The primary AI component is EfficientNet-B4, a convolutional neural network pretrained on ImageNet
-          (1.2 million images, 1000 classes). It is used as a <strong>feature extractor</strong> — not trained
-          on deepfake data, but its rich visual representations are used to measure frame-to-frame consistency.
+          A video is made up of hundreds or thousands of individual images (frames). Analyzing every single
+          frame would take too long, so DeepScan AI picks a set number of frames spread evenly from the
+          beginning to the end of the video. You can choose how many frames to analyze — more frames means
+          higher accuracy but takes longer.
         </p>
-        <p>
-          Each face crop is converted into a 1792-dimensional feature vector. Cosine similarity between
-          consecutive frame vectors detects GAN instability — real videos have stable features (0.90–0.99),
-          deepfakes have erratic features (0.65–0.85) because GANs regenerate each frame independently.
-        </p>
-        <ul>
-          <li>Architecture: EfficientNet-B4 (PyTorch, timm library)</li>
-          <li>Parameters: 19 million</li>
-          <li>Input: 224×224 RGB face crops</li>
-          <li>Output: 1792-dim feature vector per frame</li>
-          <li>Weight: 45% of final suspicion score</li>
-        </ul>
       </div>
 
-      <!-- 5 Signals -->
       <div class="page-section">
-        <h2>5-Signal Computer Vision Fusion</h2>
-        <p>Each signal is computed independently using OpenCV and contributes to the final suspicion score.</p>
+        <h2>Step 2 — Face Detection</h2>
+        <p>
+          In each sampled frame, the system automatically finds and crops the face region. This is important
+          because deepfake manipulation almost always targets the face. By focusing on the face, the analysis
+          is more precise and less affected by background noise. If no face is found in a frame, the center
+          of the image is used instead.
+        </p>
+      </div>
+
+      <div class="page-section">
+        <h2>Step 3 — Five Detection Checks</h2>
+        <p>Five independent checks run on the face crops. Each one looks for a different sign of manipulation.</p>
         <div class="tech-grid">
           <div class="glass-card tech-item">
-            <h4>Signal 1 — EfficientNet Deep Features (45%)</h4>
-            <p>Cosine similarity between consecutive frame feature vectors. Real: mean_sim 0.90–0.99, std &lt; 0.05. Deepfake: mean_sim &lt; 0.78 AND std &gt; 0.06 triggers suspicion.</p>
+            <h4>🧠 AI Feature Consistency</h4>
+            <p>A deep learning model analyzes each face and creates a unique "fingerprint" for it. In real videos, these fingerprints are very similar from frame to frame. In deepfakes, they jump around erratically because the AI regenerates the face each time.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Signal 2 — Texture Variance / Laplacian (20%)</h4>
-            <p>Laplacian operator measures face sharpness per frame. Coefficient of variation &gt; 0.55 or mean sharpness &lt; 80 indicates inconsistent texture — a deepfake artifact.</p>
+            <h4>🔬 Sharpness Consistency</h4>
+            <p>Real videos have consistently sharp faces throughout. Deepfake generators sometimes produce blurry frames mixed with sharp ones. This check measures how much the sharpness varies across frames.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Signal 3 — Face Blend Seam / Sobel (15%)</h4>
-            <p>Sobel gradient at face boundary. Border-to-inner gradient ratio &gt; 2.0 indicates a blending seam — the signature of face-swap deepfakes where a face is pasted onto a body.</p>
+            <h4>✂️ Face Boundary Check</h4>
+            <p>When a face is swapped onto a different body, there's often a visible "seam" at the edge where the face meets the neck and background. This check looks for unusually sharp edges at the face boundary — a telltale sign of face-swap deepfakes.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Signal 4 — Color Mismatch / LAB (15%)</h4>
-            <p>LAB color space comparison between face region and background. Difference &gt; 0.25 indicates the face came from a different source with different lighting or camera.</p>
+            <h4>🎨 Color Matching</h4>
+            <p>In a real video, the face and background are lit by the same light source, so their colors match naturally. In a deepfake, the face is often taken from a different video with different lighting, causing a color mismatch between the face and the rest of the scene.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Signal 5 — Temporal Flicker (5%)</h4>
-            <p>Frame-to-frame pixel difference coefficient of variation. Real: CV 0.15–0.65. Deepfake: CV &gt; 0.85 (erratic GAN output) or &lt; 0.08 (frozen/static face).</p>
+            <h4>📈 Motion Smoothness</h4>
+            <p>Real faces move smoothly and naturally between frames. Deepfake generators can produce subtle flickering or unnatural jumps in the face region. This check measures how smoothly the face changes from one frame to the next.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Weighted Fusion</h4>
-            <p>Suspicion = S1×0.45 + S2×0.20 + S3×0.15 + S4×0.15 + S5×0.05. Face weight = 1.0 if face detected, 0.4 if not. Threshold 38 → FAKE, below → REAL.</p>
+            <h4>⚖️ Combined Score</h4>
+            <p>The five checks are combined into a single suspicion score. The AI feature check carries the most weight (45%) since it's the most reliable. If the total score crosses a threshold, the video is flagged as FAKE.</p>
           </div>
         </div>
       </div>
 
-      <!-- Pipeline -->
       <div class="page-section">
-        <h2>Processing Pipeline</h2>
-        <p>When a video is submitted, the backend executes the following pipeline:</p>
-        <ul>
-          <li><strong>Frame Extraction:</strong> User-selected number of frames (10–60) evenly sampled using np.linspace across the full video duration.</li>
-          <li><strong>Face Detection:</strong> OpenCV Haar Cascade (haarcascade_frontalface_default) isolates face regions with 20% padding. Falls back to center crop if no face found.</li>
-          <li><strong>EfficientNet Inference:</strong> PyTorch EfficientNet-B4 converts each 224×224 face crop to a 1792-dim feature vector. Cosine similarity computed between consecutive frames.</li>
-          <li><strong>CV Signal Computation:</strong> Laplacian sharpness, Sobel boundary gradient, LAB color mismatch, and temporal pixel difference computed on face crops.</li>
-          <li><strong>Weighted Fusion:</strong> Five signal scores combined with fixed weights into a suspicion score 0–100.</li>
-          <li><strong>Verdict:</strong> Suspicion ≥ 38 → FAKE. Confidence mapped from suspicion score range.</li>
-        </ul>
+        <h2>Step 4 — Verdict</h2>
+        <p>
+          After all five checks are complete, the scores are combined into a final suspicion index from 0 to 100.
+          A score below 38 means the video shows no significant signs of manipulation — verdict: <strong>REAL</strong>.
+          A score of 38 or above means multiple manipulation signals were detected — verdict: <strong>FAKE</strong>.
+        </p>
+        <p>
+          The confidence percentage tells you how certain the system is. A high confidence REAL result means
+          the video passed all checks comfortably. A high confidence FAKE result means multiple strong signals
+          were detected.
+        </p>
+      </div>
+
+      <div class="page-section">
+        <h2>Important to Know</h2>
+        <p>
+          DeepScan AI is a detection tool, not a definitive judge. It works best on face-swap deepfakes —
+          videos where someone's face has been replaced with another person's. It may be less effective on
+          very short clips, very low quality videos, or highly sophisticated AI-generated content where
+          manipulation artifacts are minimal.
+        </p>
+        <p>
+          Always treat results as one piece of evidence, not a final verdict.
+        </p>
       </div>
 
     </div>
   </div>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-inner">
       <a href="../index.html" class="footer-logo">
@@ -170,20 +175,17 @@
         <a href="model.html">Model</a>
         <a href="about.html">About</a>
       </div>
-      <div class="footer-copy">© 2024 DeepScan AI. All rights reserved.</div>
+      <div class="footer-copy">© 2025 DeepScan AI. All rights reserved.</div>
     </div>
   </footer>
 
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
-
 <script>
-  // Navbar scroll
   window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
   });
-  // Hamburger
   const hb = document.getElementById('hamburger');
   const mm = document.getElementById('mobileMenu');
   hb.addEventListener('click', () => { hb.classList.toggle('open'); mm.classList.toggle('open'); });

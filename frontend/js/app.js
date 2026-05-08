@@ -229,7 +229,7 @@ async function fetchPrediction(file) {
   formData.append('upload_video_file', file);
   formData.append('num_frames', frameCount.toString());
 
-  const response = await fetch((window.CONFIG?.BACKEND_URL || 'http://localhost:8000') + '/api/predict/', {
+  const response = await fetch((window.CONFIG?.BACKEND_URL || 'http://localhost:8001') + '/api/predict/', {
     method: 'POST',
     body: formData
   });

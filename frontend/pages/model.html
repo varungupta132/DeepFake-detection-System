@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Model — DeepScan AI</title>
-  <meta name="description" content="Technical details about the MobileNetV2-based deepfake detection model used by DeepScan AI." />
+  <meta name="description" content="Learn about the AI model powering DeepScan's deepfake detection." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -19,7 +19,6 @@
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Navbar -->
 <nav class="navbar scrolled" id="navbar">
   <div class="nav-inner">
     <a href="../index.html" class="nav-logo">
@@ -55,111 +54,107 @@
 
 <div id="app" style="position:relative;z-index:1">
 
-  <!-- Hero -->
   <section class="page-hero">
     <div class="container">
-      <div class="tag tag-purple" style="margin-bottom:16px">Model Info</div>
-      <h1>The <span class="text-gradient">Detection Model</span></h1>
-      <p>Architecture details, training methodology, and performance benchmarks for the DeepScan AI core model.</p>
+      <div class="tag tag-purple" style="margin-bottom:16px">The AI Model</div>
+      <h1>What Powers <span class="text-gradient">DeepScan AI</span></h1>
+      <p>A look at the AI model and computer vision techniques behind the detection engine.</p>
     </div>
   </section>
 
   <div class="page-content">
     <div class="container">
 
-      <!-- Stats -->
       <div class="page-section">
-        <h2>Model Specifications</h2>
-        <p>EfficientNet-B4 used as a pretrained feature extractor — not fine-tuned on deepfake data.</p>
-        <div class="model-stat-grid">
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-gradient">EfficientNet-B4</div>
-            <div class="model-stat-label">Architecture</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-cyan">19M</div>
-            <div class="model-stat-label">Parameters</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-violet">1792</div>
-            <div class="model-stat-label">Feature Vector Dim</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-green">ImageNet</div>
-            <div class="model-stat-label">Pretrained On</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-cyan">224×224</div>
-            <div class="model-stat-label">Input Resolution</div>
-          </div>
-          <div class="glass-card model-stat">
-            <div class="model-stat-num text-gradient">PyTorch</div>
-            <div class="model-stat-label">Framework</div>
-          </div>
-        </div>
+        <h2>The Core AI — EfficientNet-B4</h2>
+        <p>
+          At the heart of DeepScan AI is a deep learning model called <strong>EfficientNet-B4</strong>.
+          This model was originally trained to recognize thousands of different objects and scenes from
+          millions of images. It has learned to understand visual patterns at a very deep level — textures,
+          shapes, lighting, and fine details that the human eye might miss.
+        </p>
+        <p>
+          DeepScan AI uses this model as a "visual fingerprinting" tool. For each face in the video,
+          the model creates a unique numerical description of what it sees. By comparing these descriptions
+          across frames, the system can tell whether the face is behaving consistently — like a real person
+          would — or jumping around in ways that suggest AI generation.
+        </p>
       </div>
 
-      <!-- Architecture -->
       <div class="page-section">
-        <h2>How the Model is Used</h2>
+        <h2>Why This Approach Works</h2>
         <p>
-          EfficientNet-B4 is used as a <strong>feature extractor only</strong> — it was not trained or fine-tuned
-          on deepfake data. The pretrained ImageNet weights provide rich visual representations that are
-          repurposed to measure temporal consistency across video frames.
+          When a deepfake is created, an AI generates each frame of the face somewhat independently.
+          Even though the result looks smooth to the human eye, the underlying visual patterns are
+          slightly different from frame to frame in ways that are hard to control. EfficientNet-B4
+          is sensitive enough to pick up on these subtle inconsistencies.
+        </p>
+        <p>
+          Real videos don't have this problem. A real person's face changes naturally and smoothly
+          between frames — the visual fingerprints stay consistent throughout the video.
+        </p>
+      </div>
+
+      <div class="page-section">
+        <h2>The Supporting Checks</h2>
+        <p>
+          The AI model alone isn't enough — deepfakes come in many forms. That's why four additional
+          computer vision checks run alongside it:
         </p>
         <div class="tech-grid">
           <div class="glass-card tech-item">
-            <h4>Feature Extraction</h4>
-            <p>The classification head is removed (num_classes=0). Each 224×224 face crop produces a 1792-dimensional feature vector representing visual content.</p>
+            <h4>Sharpness Analysis</h4>
+            <p>Checks whether the face stays consistently sharp across all frames. Deepfake generators sometimes produce frames with uneven sharpness that real cameras don't.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Cosine Similarity</h4>
-            <p>dot(v1, v2) / (||v1|| × ||v2||) between consecutive frame vectors. Measures how similar adjacent frames are in feature space.</p>
+            <h4>Edge Detection</h4>
+            <p>Looks for unnatural sharp edges at the boundary of the face — a common sign that a face has been digitally pasted onto a different body or background.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Why EfficientNet-B4</h4>
-            <p>Best accuracy-to-parameter ratio among CNNs. 83% ImageNet top-1 accuracy with only 19M parameters — fast enough for CPU inference.</p>
+            <h4>Color Analysis</h4>
+            <p>Compares the color and lighting of the face against the rest of the scene. A face taken from a different video often has slightly different color tones that don't match the background.</p>
           </div>
           <div class="glass-card tech-item">
-            <h4>Library: timm</h4>
-            <p>PyTorch Image Models (timm) library. Loaded with: timm.create_model("efficientnet_b4", pretrained=True, num_classes=0)</p>
+            <h4>Motion Analysis</h4>
+            <p>Measures how smoothly the face moves between frames. Deepfakes can produce subtle flickering or unnatural movement patterns that real faces don't exhibit.</p>
           </div>
         </div>
       </div>
 
-      <!-- Signal Fusion -->
       <div class="page-section">
-        <h2>Signal Fusion Formula</h2>
-        <p>The EfficientNet score is combined with 4 OpenCV signals using fixed weights:</p>
-        <div class="glass-card" style="padding:24px;margin:20px 0;font-family:monospace;font-size:0.9rem;color:var(--cyan)">
-          suspicious = S1×0.45 + S2×0.20 + S3×0.15×fw + S4×0.15×fw + S5×0.05<br/><br/>
-          S1 = EfficientNet cosine similarity score<br/>
-          S2 = Laplacian texture variance score<br/>
-          S3 = Sobel face blend seam score<br/>
-          S4 = LAB color mismatch score<br/>
-          S5 = Temporal flicker score<br/>
-          fw = face_weight (1.0 if face found, 0.4 if not)<br/><br/>
-          suspicious ≥ 38 → FAKE &nbsp;|&nbsp; suspicious &lt; 38 → REAL
-        </div>
+        <h2>How the Final Decision is Made</h2>
+        <p>
+          All five checks produce individual scores. These scores are combined — with the AI model's
+          result carrying the most weight since it's the most reliable signal. The combined score
+          is compared against a threshold to produce the final REAL or FAKE verdict.
+        </p>
+        <p>
+          The confidence percentage shows how far the score is from the decision boundary. A 90%
+          confidence REAL result means the video passed all checks by a wide margin. A 75% confidence
+          FAKE result means some signals were detected but not all were strongly triggered.
+        </p>
       </div>
 
-      <!-- Limitations -->
       <div class="page-section">
-        <h2>Known Limitations</h2>
-        <p>No detection system is perfect. DeepScan AI has the following known limitations:</p>
+        <h2>Limitations</h2>
+        <p>
+          No detection system is perfect. DeepScan AI works best on face-swap deepfakes where a
+          person's face has been replaced. It may be less effective on:
+        </p>
         <ul>
-          <li>Performance may degrade on very low-resolution videos (below 240p)</li>
-          <li>Heavily compressed or re-encoded videos can reduce signal quality</li>
-          <li>Novel generation methods not represented in training data may achieve lower detection rates</li>
-          <li>Videos with no detectable faces fall back to frame-level analysis only</li>
-          <li>Very short clips (under 2 seconds) provide limited temporal signal</li>
+          <li>Very short videos (under 2 seconds) — not enough frames to analyze</li>
+          <li>Very low quality or heavily compressed videos</li>
+          <li>Videos with no visible face</li>
+          <li>Highly sophisticated AI-generated content from the latest generation tools</li>
         </ul>
+        <p>
+          Always use the results as one piece of evidence alongside other context, not as a definitive judgment.
+        </p>
       </div>
 
     </div>
   </div>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-inner">
       <a href="../index.html" class="footer-logo">
@@ -175,14 +170,13 @@
         <a href="model.html">Model</a>
         <a href="about.html">About</a>
       </div>
-      <div class="footer-copy">© 2024 DeepScan AI. All rights reserved.</div>
+      <div class="footer-copy">© 2025 DeepScan AI. All rights reserved.</div>
     </div>
   </footer>
 
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
-
 <script>
   window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
