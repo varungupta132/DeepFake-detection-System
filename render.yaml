@@ -1,12 +1,11 @@
 services:
   - type: web
     name: deepfake-detection-backend
-    runtime: node
+    runtime: docker
     region: oregon
     plan: free
     branch: main
-    buildCommand: "bash build.sh"
-    startCommand: "cd node-backend && node server.js"
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: PORT
         value: 8080
