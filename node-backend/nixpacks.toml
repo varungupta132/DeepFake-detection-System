@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python311", "libGL", "libGLU", "glib"]
+
+[phases.install]
+cmds = ["npm install", "pip install -r ../backend/requirements.txt"]
+
+[start]
+cmd = "node server.js"
