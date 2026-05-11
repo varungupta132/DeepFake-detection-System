@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     branch: main
-    buildCommand: "apt-get update && apt-get install -y python3 python3-pip libgl1 libglib2.0-0 && pip3 install -r backend/requirements.txt && cd node-backend && npm install"
+    buildCommand: "bash build.sh"
     startCommand: "cd node-backend && node server.js"
     envVars:
       - key: PORT
