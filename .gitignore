@@ -36,6 +36,7 @@ Thumbs.db
 # Temporary files
 backend/temp_uploads/*
 backend/processed_media/*
+node-backend/temp_uploads/*
 !backend/temp_uploads/.gitkeep
 !backend/processed_media/.gitkeep
 
