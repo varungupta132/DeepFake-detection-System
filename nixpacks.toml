@@ -8,4 +8,7 @@ cmds = [
 ]
 
 [start]
-cmd = "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/nix/store/$(ls /nix/store | grep -m1 zlib)/lib && cd node-backend && node server.js"
+cmd = "cd node-backend && node server.js"
+
+[variables]
+LD_LIBRARY_PATH = "/nix/store/*-zlib-*/lib:$LD_LIBRARY_PATH"
