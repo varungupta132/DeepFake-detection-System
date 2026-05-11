@@ -192,6 +192,23 @@ async function startAnalysis() {
     backBtn.style.pointerEvents = 'none';
   }
 
+  // ── Wake up backend if sleeping ──────────────────────────────────────────
+  const isAwake = await wakeUpBackend();
+  if (!isAwake) {
+    // Unlock UI
+    if (analyzeBtn) {
+      analyzeBtn.disabled = false;
+      analyzeBtn.style.opacity = '';
+      analyzeBtn.style.pointerEvents = '';
+    }
+    if (backBtn) {
+      backBtn.style.opacity = '';
+      backBtn.style.pointerEvents = '';
+    }
+    showToast('Could not connect to server. Please try again in a moment.', 'error');
+    return;
+  }
+
   const progressPanel = document.getElementById('progressPanel');
   if (progressPanel) progressPanel.classList.add('visible');
 
@@ -214,13 +231,47 @@ async function startAnalysis() {
       backBtn.style.opacity = '';
       backBtn.style.pointerEvents = '';
     }
-    showToast(err.message || 'Analysis failed. Is the backend running on port 8000?', 'error');
+    showToast(err.message || 'Analysis failed. Is the backend running on port 8001?', 'error');
     return;
   }
 
   await sleep(400);
   renderResults(data);
   showView('results');
+}
+
+// ── Wake up backend (handles cold start / sleep) ──────────────────────────────
+// Pings /health up to 5 times with 6s gap — total max wait ~30s
+async function wakeUpBackend() {
+  const baseUrl = window.CONFIG?.BACKEND_URL || 'http://localhost:8001';
+
+  // If localhost — no sleep issue, skip wakeup
+  if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) return true;
+
+  showToast('Connecting to server... please wait', 'info');
+
+  const MAX_TRIES  = 5;
+  const RETRY_GAP  = 6000; // 6 seconds between tries
+
+  for (let i = 0; i < MAX_TRIES; i++) {
+    try {
+      const res = await fetch(baseUrl + '/health', {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000), // 5s per attempt
+      });
+      if (res.ok) {
+        if (i > 0) showToast('Server is ready!', 'success');
+        return true;
+      }
+    } catch (_) {
+      // Server not yet awake — wait and retry
+    }
+    if (i < MAX_TRIES - 1) {
+      showToast(`Server is starting up... (${i + 1}/${MAX_TRIES})`, 'info');
+      await sleep(RETRY_GAP);
+    }
+  }
+  return false; // gave up after 5 tries
 }
 
 async function fetchPrediction(file) {
