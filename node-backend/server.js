@@ -12,7 +12,7 @@ const fs         = require('fs');
 const os         = require('os');
 
 const app  = express();
-const PORT = process.env.PORT || 8001;
+const PORT = process.env.PORT || 8080;
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 app.use(cors({
