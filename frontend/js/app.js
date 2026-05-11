@@ -246,7 +246,7 @@ async function wakeUpBackend() {
   const baseUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
       ? 'http://localhost:8001'
-      : 'https://deepfake-detection-system-production.up.railway.app'
+      : 'https://deepfake-detection-system-1-9le8.onrender.com'
   );
 
   // If localhost — no sleep issue, skip wakeup
@@ -287,7 +287,7 @@ async function fetchPrediction(file) {
   const backendUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
       ? 'http://localhost:8001'
-      : 'https://deepfake-detection-system-production.up.railway.app'
+      : 'https://deepfake-detection-system-1-9le8.onrender.com'
   );
 
   const controller = new AbortController();
