@@ -85,7 +85,7 @@ app.post('/api/predict/', upload.single('upload_video_file'), async (req, res) =
   const numFrames = parseInt(req.body.num_frames) || 30;
   // Clamp between 10 and 60
   const frames = Math.min(60, Math.max(10, numFrames));
-  console.log(`\n📥 Received: ${req.file.originalname} (${(req.file.size / 1024 / 1024).toFixed(1)} MB) | frames: ${frames}`);
+  console.log(`\n[RECEIVED] ${req.file.originalname} (${(req.file.size / 1024 / 1024).toFixed(1)} MB) | frames: ${frames}`);
 
   try {
     const result = await runPythonDetector(videoPath, frames);
@@ -106,7 +106,7 @@ function runPythonDetector(videoPath, numFrames) {
     const detectorScript = path.join(__dirname, '..', 'backend', 'run_detector.py');
     const pythonCmd      = process.platform === 'win32' ? 'python' : 'python3';
 
-    console.log(`  🐍 Running: ${pythonCmd} ${detectorScript} "${videoPath}" ${numFrames}`);
+    console.log(`  [PYTHON] Running: ${pythonCmd} ${detectorScript} "${videoPath}" ${numFrames}`);
 
     const py = spawn(pythonCmd, [detectorScript, videoPath, String(numFrames)], {
       cwd: path.join(__dirname, '..', 'backend'),
@@ -124,7 +124,8 @@ function runPythonDetector(videoPath, numFrames) {
 
     py.on('close', (code) => {
       if (code !== 0) {
-        return reject(new Error(stderr || `Python exited with code ${code}`));
+        console.error('Python stderr:', stderr);
+        return reject(new Error(stderr.trim() || `Python exited with code ${code}`));
       }
       try {
         // Last line of stdout is the JSON result
@@ -154,7 +155,7 @@ app.use((err, req, res, next) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
   console.log('\n' + '='.repeat(55));
-  console.log('  🛡  DeepScan AI — Node.js + Express Backend v9.0');
-  console.log(`  🔗  http://0.0.0.0:${PORT}`);
+  console.log('  DeepScan AI -- Node.js + Express Backend v9.0');
+  console.log(`  http://0.0.0.0:${PORT}`);
   console.log('='.repeat(55) + '\n');
 });

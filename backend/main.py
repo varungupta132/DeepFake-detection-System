@@ -35,9 +35,9 @@ ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".wmv", ".mpeg", 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("\n" + "=" * 55)
-    print("  🛡  DeepScan AI — Backend v5.0")
-    print("  🔗  http://0.0.0.0:8000")
-    print("  📚  Docs: http://0.0.0.0:8000/docs")
+    print("  DeepScan AI -- Backend v5.0")
+    print("  http://0.0.0.0:8000")
+    print("  Docs: http://0.0.0.0:8000/docs")
     print("=" * 55 + "\n")
 
     # Cleanup stale uploads older than 1 hour
@@ -133,7 +133,7 @@ async def predict(upload_video_file: UploadFile = File(...)):
         if size_mb > 100:
             raise HTTPException(status_code=413, detail="File exceeds 100 MB limit.")
 
-        print(f"\n📥 Received: {filename} ({size_mb:.1f} MB)")
+        print(f"\n[RECEIVED] {filename} ({size_mb:.1f} MB)")
 
         # ── Analyze ───────────────────────────────────────────────────────────
         result = analyze_video(temp_path)

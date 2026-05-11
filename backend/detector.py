@@ -39,10 +39,14 @@ def _get_model():
     if _eff_model is None:
         import torch
         import timm
+        import warnings
+        warnings.filterwarnings("ignore")
+        os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+        os.environ["TRANSFORMERS_VERBOSITY"] = "error"
         model = timm.create_model("efficientnet_b4", pretrained=True, num_classes=0)
         model.eval()
         _eff_model = model
-        print("  ✓ EfficientNet-B4 feature extractor loaded")
+        print("  [OK] EfficientNet-B4 feature extractor loaded")
     return _eff_model
 
 
@@ -425,7 +429,7 @@ def analyze_video(video_path: str, num_frames: int = 30) -> Dict:
     if not frames:
         raise ValueError("Could not extract frames from video")
 
-    print(f"\n  📹 {meta['width']}x{meta['height']} @ {meta['fps']}fps | "
+    print(f"\n  [VIDEO] {meta['width']}x{meta['height']} @ {meta['fps']}fps | "
           f"{meta['duration_sec']}s | {meta['total_frames']} frames | "
           f"sampled {meta['frames_analyzed']}")
 
@@ -437,9 +441,9 @@ def analyze_video(video_path: str, num_frames: int = 30) -> Dict:
         )) > 0
         for f in frames[:5]
     )
-    print(f"  👤 Face detection: {'found' if has_faces else 'not found'} | {len(crops)} crops")
+    print(f"  [FACE] Face detection: {'found' if has_faces else 'not found'} | {len(crops)} crops")
 
-    print("  🔬 Running signal analysis...")
+    print("  [ANALYSIS] Running signal analysis...")
 
     # Signal 1: Deep feature consistency (most reliable)
     s1, _ = _deep_feature_score(crops)
@@ -547,7 +551,7 @@ def analyze_video(video_path: str, num_frames: int = 30) -> Dict:
     processing_time = round(time.time() - t0, 2)
     verdict = "FAKE" if is_fake else "REAL"
 
-    print(f"  🎯 {verdict} | suspicious={suspicious:.1f} | "
+    print(f"  [RESULT] {verdict} | suspicious={suspicious:.1f} | "
           f"conf={conf:.1f}% | {processing_time}s")
 
     return {
