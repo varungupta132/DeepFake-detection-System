@@ -243,7 +243,11 @@ async function startAnalysis() {
 // ── Wake up backend (handles cold start / sleep) ──────────────────────────────
 // Pings /health up to 5 times with 6s gap — total max wait ~30s
 async function wakeUpBackend() {
-  const baseUrl = window.CONFIG?.BACKEND_URL || 'http://localhost:8001';
+  const baseUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
+      ? 'http://localhost:8001'
+      : 'https://deepfake-detection-system-production.up.railway.app'
+  );
 
   // If localhost — no sleep issue, skip wakeup
   if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) return true;
@@ -280,17 +284,44 @@ async function fetchPrediction(file) {
   formData.append('upload_video_file', file);
   formData.append('num_frames', frameCount.toString());
 
-  const response = await fetch((window.CONFIG?.BACKEND_URL || 'http://localhost:8001') + '/api/predict/', {
-    method: 'POST',
-    body: formData
-  });
+  const backendUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
+      ? 'http://localhost:8001'
+      : 'https://deepfake-detection-system-production.up.railway.app'
+  );
+
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 3 * 60 * 1000);
+
+  let response;
+  try {
+    response = await fetch(backendUrl + '/api/predict/', {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out (3 min). Please try again.');
+    }
+    throw new Error(
+      'Cannot reach backend server. ' +
+      (backendUrl.includes('localhost')
+        ? 'Make sure the backend is running: cd node-backend && node server.js'
+        : 'The server may be starting up — please wait 30 seconds and try again.')
+    );
+  }
+  clearTimeout(timeoutId);
 
   if (!response.ok) {
     let msg = `Server error (${response.status})`;
     try {
-      const err = await response.json();
-      msg = err.detail || err.message || msg;
+      const errBody = await response.json();
+      msg = errBody.detail || errBody.message || msg;
     } catch (_) {}
+    if (response.status === 413) msg = 'File too large. Maximum size is 100MB.';
+    if (response.status === 500) msg = 'Backend processing error. Please try a different video.';
     throw new Error(msg);
   }
 
