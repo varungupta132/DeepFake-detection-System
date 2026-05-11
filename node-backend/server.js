@@ -100,15 +100,30 @@ app.post('/api/predict/', upload.single('upload_video_file'), async (req, res) =
 });
 
 // ── Python detector runner ────────────────────────────────────────────────────
+function getPythonCmd() {
+  if (process.platform === 'win32') return 'python';
+  // On Railway/Linux with nixpacks python311, try these in order
+  const { execSync } = require('child_process');
+  for (const cmd of ['python3.11', 'python3', 'python']) {
+    try {
+      execSync(`which ${cmd}`, { stdio: 'ignore' });
+      return cmd;
+    } catch (_) {}
+  }
+  return 'python3'; // fallback
+}
+
+const PYTHON_CMD = getPythonCmd();
+console.log(`  [PYTHON] Using command: ${PYTHON_CMD}`);
+
 function runPythonDetector(videoPath, numFrames) {
   return new Promise((resolve, reject) => {
     // Path to detector script (in ../backend/)
     const detectorScript = path.join(__dirname, '..', 'backend', 'run_detector.py');
-    const pythonCmd      = process.platform === 'win32' ? 'python' : 'python3';
 
-    console.log(`  [PYTHON] Running: ${pythonCmd} ${detectorScript} "${videoPath}" ${numFrames}`);
+    console.log(`  [PYTHON] Running: ${PYTHON_CMD} ${detectorScript} "${videoPath}" ${numFrames}`);
 
-    const py = spawn(pythonCmd, [detectorScript, videoPath, String(numFrames)], {
+    const py = spawn(PYTHON_CMD, [detectorScript, videoPath, String(numFrames)], {
       cwd: path.join(__dirname, '..', 'backend'),
     });
 
@@ -165,11 +180,10 @@ app.listen(PORT, '0.0.0.0', () => {
 
 function warmupModel() {
   const detectorScript = path.join(__dirname, '..', 'backend', 'run_detector.py');
-  const pythonCmd      = process.platform === 'win32' ? 'python' : 'python3';
 
   console.log('  [WARMUP] Pre-loading EfficientNet model...');
 
-  const py = spawn(pythonCmd, [detectorScript, '--warmup'], {
+  const py = spawn(PYTHON_CMD, [detectorScript, '--warmup'], {
     cwd: path.join(__dirname, '..', 'backend'),
   });
 
