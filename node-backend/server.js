@@ -101,15 +101,25 @@ app.post('/api/predict/', upload.single('upload_video_file'), async (req, res) =
 
 // ── Python detector runner ────────────────────────────────────────────────────
 function getPythonCmd() {
+  // Railway/nixpacks sets NIXPACKS_PYTHON_VERSION env var
+  if (process.env.NIXPACKS_PYTHON_VERSION) {
+    return 'python3'; // nixpacks ensures python3 is in PATH
+  }
+  
   if (process.platform === 'win32') return 'python';
-  // On Railway/Linux with nixpacks python311, try these in order
+  
+  // Try to find python in PATH
   const { execSync } = require('child_process');
   for (const cmd of ['python3.11', 'python3', 'python']) {
     try {
-      execSync(`which ${cmd}`, { stdio: 'ignore' });
-      return cmd;
+      const result = execSync(`which ${cmd}`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+      if (result.trim()) {
+        console.log(`  [PYTHON] Found: ${result.trim()}`);
+        return cmd;
+      }
     } catch (_) {}
   }
+  
   return 'python3'; // fallback
 }
 
@@ -120,6 +130,13 @@ function runPythonDetector(videoPath, numFrames) {
   return new Promise((resolve, reject) => {
     // Path to detector script (in ../backend/)
     const detectorScript = path.join(__dirname, '..', 'backend', 'run_detector.py');
+    
+    // Debug: Check if backend folder and script exist
+    const backendDir = path.join(__dirname, '..', 'backend');
+    console.log(`  [DEBUG] Backend dir exists: ${fs.existsSync(backendDir)}`);
+    console.log(`  [DEBUG] Detector script exists: ${fs.existsSync(detectorScript)}`);
+    console.log(`  [DEBUG] Current dir: ${__dirname}`);
+    console.log(`  [DEBUG] Script path: ${detectorScript}`);
 
     console.log(`  [PYTHON] Running: ${PYTHON_CMD} ${detectorScript} "${videoPath}" ${numFrames}`);
 
@@ -173,6 +190,17 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('  DeepScan AI -- Node.js + Express Backend v9.0');
   console.log(`  http://0.0.0.0:${PORT}`);
   console.log('='.repeat(55) + '\n');
+
+  // Debug: Check if backend folder exists
+  const backendDir = path.join(__dirname, '..', 'backend');
+  const detectorScript = path.join(backendDir, 'run_detector.py');
+  console.log(`  [STARTUP] Backend folder exists: ${fs.existsSync(backendDir)}`);
+  console.log(`  [STARTUP] Detector script exists: ${fs.existsSync(detectorScript)}`);
+  console.log(`  [STARTUP] __dirname: ${__dirname}`);
+  
+  if (!fs.existsSync(backendDir)) {
+    console.error('  [ERROR] Backend folder not found! Railway Root Directory must be set to "/" not "/node-backend"');
+  }
 
   // Pre-load EfficientNet model on startup so first request is fast
   warmupModel();
