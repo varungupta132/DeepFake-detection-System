@@ -241,7 +241,8 @@ async function startAnalysis() {
 }
 
 // ── Wake up backend (handles cold start / sleep) ──────────────────────────────
-// Pings /health up to 5 times with 6s gap — total max wait ~30s
+// For localhost: instant return (no wakeup needed)
+// For remote: pings /health up to 5 times with 6s gap
 async function wakeUpBackend() {
   const baseUrl = window.BACKEND_URL || (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
@@ -249,10 +250,14 @@ async function wakeUpBackend() {
       : 'https://deepfake-backend.onrender.com'
   );
 
-  // If localhost — no sleep issue, skip wakeup
-  if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) return true;
+  // If localhost — no sleep issue, skip wakeup completely
+  if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
+    console.log('[LOCAL] Backend is localhost - skipping wakeup check');
+    return true;
+  }
 
-  showToast('Connecting to server... please wait', 'info');
+  // Remote server - check if awake
+  showToast('Connecting to remote server...', 'info');
 
   const MAX_TRIES  = 5;
   const RETRY_GAP  = 6000; // 6 seconds between tries
@@ -271,7 +276,7 @@ async function wakeUpBackend() {
       // Server not yet awake — wait and retry
     }
     if (i < MAX_TRIES - 1) {
-      showToast(`Server is starting up... (${i + 1}/${MAX_TRIES})`, 'info');
+      showToast(`Server waking up... (${i + 1}/${MAX_TRIES})`, 'info');
       await sleep(RETRY_GAP);
     }
   }
@@ -309,8 +314,8 @@ async function fetchPrediction(file) {
     throw new Error(
       'Cannot reach backend server. ' +
       (backendUrl.includes('localhost')
-        ? 'Make sure the backend is running: cd node-backend && node server.js'
-        : 'The server may be starting up — please wait 30 seconds and try again.')
+        ? 'Make sure the backend is running: cd backend && python main.py'
+        : 'The server may be sleeping — please wait 30 seconds and try again.')
     );
   }
   clearTimeout(timeoutId);
