@@ -17,8 +17,11 @@ const PORT = process.env.PORT || 8080;
 // ── CORS ──────────────────────────────────────────────────────────────────────
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  methods: ['GET', 'POST', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: false,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 app.use(express.json());
@@ -54,6 +57,9 @@ const upload = multer({
 });
 
 // ── Routes ────────────────────────────────────────────────────────────────────
+// Handle preflight requests
+app.options('*', cors());
+
 app.get('/', (req, res) => {
   res.json({
     name:    'DeepScan AI',
@@ -77,6 +83,11 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/api/predict/', upload.single('upload_video_file'), async (req, res) => {
+  // Add CORS headers explicitly
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  
   if (!req.file) {
     return res.status(400).json({ detail: 'No video file uploaded.' });
   }
