@@ -8,17 +8,17 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
+# Set working directory to backend
+WORKDIR /app/backend
 
 # Copy backend files
-COPY backend/ ./backend/
+COPY backend/ /app/backend/
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose port
 EXPOSE 8080
 
-# Start FastAPI directly (no Node.js!)
-CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Start FastAPI (working directory is /app/backend, so imports work)
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

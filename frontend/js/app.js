@@ -243,10 +243,10 @@ async function startAnalysis() {
 // ── Wake up backend (handles cold start / sleep) ──────────────────────────────
 // Pings /health up to 5 times with 6s gap — total max wait ~30s
 async function wakeUpBackend() {
-  const baseUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
+  const baseUrl = window.BACKEND_URL || (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
       ? 'http://localhost:8080'
-      : 'https://deepfake-detection-system-ktft.onrender.com'
+      : 'https://deepfake-backend.onrender.com'
   );
 
   // If localhost — no sleep issue, skip wakeup
@@ -284,10 +284,11 @@ async function fetchPrediction(file) {
   formData.append('upload_video_file', file);
   formData.append('num_frames', frameCount.toString());
 
-  const backendUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
+  // Use environment variable or fallback to localhost/Render
+  const backendUrl = window.BACKEND_URL || (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
       ? 'http://localhost:8080'
-      : 'https://deepfake-detection-system-ktft.onrender.com'
+      : 'https://deepfake-backend.onrender.com'
   );
 
   const controller = new AbortController();
