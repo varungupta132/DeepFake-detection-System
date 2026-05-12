@@ -229,8 +229,8 @@ async function fetchPrediction(file) {
   formData.append('upload_video_file', file);
   formData.append('num_frames', frameCount.toString());
 
-  // AWS EC2 backend URL (via Nginx on port 80)
-  const backendUrl = 'http://32.194.89.63';
+  // Backend on same server (relative URL)
+  const backendUrl = '';
 
   const controller = new AbortController();
   const timeoutId  = setTimeout(() => controller.abort(), 10 * 60 * 1000); // 10 minutes
