@@ -35,10 +35,10 @@ ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".wmv", ".mpeg", 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("\n" + "=" * 55)
-    print("  DeepScan AI -- Pure Python Backend v9.0")
+    print("  DeepScan AI -- Backend v8.0")
     print("  http://0.0.0.0:8080")
     print("  Docs: http://0.0.0.0:8080/docs")
-    print("  Ultra-lightweight: Pure OpenCV (NO PyTorch)")
+    print("  EfficientNet-B4 + 5-Signal CV Fusion")
     print("=" * 55 + "\n")
 
     # Cleanup stale uploads older than 1 hour
@@ -54,8 +54,8 @@ async def lifespan(app: FastAPI):
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="DeepScan AI API",
-    description="Pure OpenCV + 5-Signal CV Fusion deepfake detection (Ultra-Lightweight)",
-    version="9.0.0",
+    description="EfficientNet-B4 + 5-Signal CV Fusion deepfake detection",
+    version="8.0.0",
     lifespan=lifespan,
 )
 
@@ -73,9 +73,9 @@ app.add_middleware(
 async def root():
     return {
         "name": "DeepScan AI",
-        "version": "9.0.0",
+        "version": "8.0.0",
         "status": "running",
-        "stack": "Pure Python + OpenCV (Ultra-Lightweight)",
+        "stack": "Pure Python + EfficientNet-B4",
         "endpoints": {
             "health": "/health",
             "predict": "POST /api/predict/",
@@ -88,8 +88,8 @@ async def root():
 async def health():
     return {
         "status": "healthy",
-        "version": "9.0.0",
-        "detection_method": "Pure OpenCV + 5-Signal CV Fusion",
+        "version": "8.0.0",
+        "detection_method": "EfficientNet-B4 + 5-Signal CV Fusion",
     }
 
 
@@ -103,7 +103,7 @@ async def predict(
 
     - Accepts: MP4, AVI, MOV, MKV, WebM (max 100 MB)
     - Returns: verdict, confidence, 5-signal analysis breakdown
-    - Ultra-lightweight: < 250MB RAM usage
+    - Uses EfficientNet-B4 for deep feature analysis
     """
     temp_path = None
 
