@@ -208,37 +208,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  [STARTUP] Backend folder exists: ${fs.existsSync(backendDir)}`);
   console.log(`  [STARTUP] Detector script exists: ${fs.existsSync(detectorScript)}`);
   console.log(`  [STARTUP] __dirname: ${__dirname}`);
+  console.log(`  [STARTUP] Ultra-lightweight mode: No PyTorch, pure OpenCV`);
   
   if (!fs.existsSync(backendDir)) {
     console.error('  [ERROR] Backend folder not found! Railway Root Directory must be set to "/" not "/node-backend"');
   }
-
-  // Pre-load EfficientNet model on startup so first request is fast
-  warmupModel();
 });
-
-function warmupModel() {
-  const detectorScript = path.join(__dirname, '..', 'backend', 'run_detector.py');
-
-  console.log('  [WARMUP] Pre-loading EfficientNet model...');
-
-  const py = spawn(PYTHON_CMD, [detectorScript, '--warmup'], {
-    cwd: path.join(__dirname, '..', 'backend'),
-  });
-
-  let stdout = '';
-  py.stdout.on('data', d => { stdout += d.toString(); });
-  py.stderr.on('data', d => { process.stdout.write(d.toString()); });
-
-  py.on('close', (code) => {
-    if (code === 0) {
-      console.log('  [WARMUP] EfficientNet model loaded and ready!');
-    } else {
-      console.log('  [WARMUP] Model pre-load failed — will load on first request');
-    }
-  });
-
-  py.on('error', () => {
-    console.log('  [WARMUP] Python not found — model will load on first request');
-  });
-}

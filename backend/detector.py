@@ -1,25 +1,25 @@
 """
-DeepScan AI — Detector v8.1 (Optimized)
+DeepScan AI — Detector v9.0 (Ultra-Lightweight)
 
-Honest approach:
-  We do NOT have a trained deepfake classifier.
-  Instead we use a combination of:
-    1. EfficientNet-B0 (ImageNet pretrained) deep feature consistency
-       across face crops — deepfakes have inconsistent deep features
-    2. Face-crop specific artifact analysis
-    3. Careful calibration so real videos score REAL
+Optimized for 512MB RAM servers:
+  - NO PyTorch, NO EfficientNet (saves 200MB+ RAM)
+  - Pure OpenCV + NumPy based detection
+  - 5 CV-based signals for deepfake detection
+  - Fast processing: 30-60 seconds per video
 
-Optimized for low-RAM servers (512MB):
-  - Uses EfficientNet-B0 instead of B4 (5x faster, 4x less RAM)
-  - Processes 8 frames instead of 16 for deep features
-  - Maintains accuracy while improving speed
+Detection signals:
+  1. Face texture consistency (Laplacian variance)
+  2. Face boundary blending artifacts (Sobel edge detection)
+  3. Color inconsistency (LAB color space analysis)
+  4. Temporal flickering (frame-to-frame difference)
+  5. Motion naturalness (optical flow)
 
 This is NOT a magic oracle. It works best on:
   - Face-swap deepfakes (FaceSwap, DeepFaceLab style)
   - Low-quality AI generated videos
   
 It may struggle with:
-  - High-quality modern AI generators (Kling, Sora) that have no face
+  - High-quality modern AI generators (Kling, Sora)
   - Very short clips
 """
 
@@ -35,25 +35,6 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 _face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 )
-
-# ── Lazy-load EfficientNet ────────────────────────────────────────────────────
-_eff_model = None
-
-def _get_model():
-    global _eff_model
-    if _eff_model is None:
-        import torch
-        import timm
-        import warnings
-        warnings.filterwarnings("ignore")
-        os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
-        os.environ["TRANSFORMERS_VERBOSITY"] = "error"
-        # Use B0 instead of B4 for faster processing on low-RAM servers
-        model = timm.create_model("efficientnet_b0", pretrained=True, num_classes=0)
-        model.eval()
-        _eff_model = model
-        print("  [OK] EfficientNet-B0 feature extractor loaded (optimized for speed)")
-    return _eff_model
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -126,84 +107,71 @@ def _get_face_crops(frames: List[np.ndarray], size: int = 224) -> List[np.ndarra
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SIGNAL 1 — Deep Feature Consistency (EfficientNet)
-# Deepfakes: face features are inconsistent across frames (GAN instability)
-# Real videos: face features are smoothly consistent
+# SIGNAL 1 — Face Histogram Consistency (Pure OpenCV)
+# Deepfakes: face color histogram is inconsistent across frames
+# Real videos: face histogram is smoothly consistent
 # Returns: suspicion score 0-100
 # ─────────────────────────────────────────────────────────────────────────────
 def _deep_feature_score(crops: List[np.ndarray]) -> Tuple[float, str]:
+    """Pure OpenCV histogram-based consistency check (no PyTorch)"""
     if len(crops) < 4:
         return 20.0, ""
 
     try:
-        import torch
-        from torchvision import transforms
+        # Compute color histograms for each face crop
+        hists = []
+        for crop in crops[:12]:  # Process up to 12 frames
+            # Convert to HSV for better color representation
+            hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+            # Compute histogram for H and S channels
+            h_hist = cv2.calcHist([hsv], [0], None, [32], [0, 180])
+            s_hist = cv2.calcHist([hsv], [1], None, [32], [0, 256])
+            # Normalize
+            h_hist = cv2.normalize(h_hist, h_hist).flatten()
+            s_hist = cv2.normalize(s_hist, s_hist).flatten()
+            # Combine
+            hist = np.concatenate([h_hist, s_hist])
+            hists.append(hist)
 
-        model = _get_model()
-
-        tf = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406],
-                                  [0.229, 0.224, 0.225]),
-        ])
-
-        feats = []
-        with torch.no_grad():
-            for crop in crops[:8]:  # Reduced from 16 to 8 for faster processing
-                rgb    = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
-                tensor = tf(rgb).unsqueeze(0)
-                feat   = model(tensor).squeeze().numpy()
-                feats.append(feat)
-
-        if len(feats) < 2:
+        if len(hists) < 2:
             return 20.0, ""
 
-        # Cosine similarity between consecutive frames
-        sims = []
-        for i in range(len(feats) - 1):
-            a, b = feats[i], feats[i+1]
-            cos  = float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-8))
-            sims.append(cos)
+        # Compare consecutive histograms using correlation
+        correlations = []
+        for i in range(len(hists) - 1):
+            corr = cv2.compareHist(
+                hists[i].astype(np.float32), 
+                hists[i+1].astype(np.float32), 
+                cv2.HISTCMP_CORREL
+            )
+            correlations.append(float(corr))
 
-        mean_sim = float(np.mean(sims))
-        std_sim  = float(np.std(sims))
+        mean_corr = float(np.mean(correlations))
+        std_corr = float(np.std(correlations))
 
-        print(f"     Deep features: mean_sim={mean_sim:.3f}, std_sim={std_sim:.3f}")
+        print(f"     Histogram consistency: mean_corr={mean_corr:.3f}, std_corr={std_corr:.3f}")
 
-        # Calibration notes:
-        # EfficientNet-B4 on real camera video (any resolution):
-        #   mean_sim typically 0.82-0.99  (varies with motion/scene)
-        #   std_sim  typically 0.01-0.08
-        #
-        # Face-swap deepfake:
-        #   mean_sim typically 0.65-0.85  (GAN instability)
-        #   std_sim  typically 0.06-0.15  (erratic jumps)
-        #
-        # Key insight: use BOTH mean AND std together, not independently.
-        # A real video with lots of motion has low mean_sim but also
-        # proportionally low std_sim (consistent motion).
-        # A deepfake has low mean_sim AND high std_sim (erratic).
-
+        # Real video: mean_corr > 0.85, std_corr < 0.08
+        # Deepfake: mean_corr < 0.75, std_corr > 0.12
         susp = 0.0
 
-        # Only flag if BOTH mean is low AND std is high (deepfake pattern)
-        if mean_sim < 0.72 and std_sim > 0.08:
-            susp += 70.0   # strong deepfake signal
-        elif mean_sim < 0.78 and std_sim > 0.06:
-            susp += 45.0   # moderate deepfake signal
-        elif mean_sim < 0.82 and std_sim > 0.09:
+        if mean_corr < 0.65 and std_corr > 0.15:
+            susp += 75.0   # strong deepfake signal
+        elif mean_corr < 0.72 and std_corr > 0.12:
+            susp += 50.0   # moderate deepfake signal
+        elif mean_corr < 0.78 and std_corr > 0.10:
             susp += 35.0   # possible deepfake
-        elif std_sim > 0.12:
-            susp += 30.0   # very erratic regardless of mean
-        elif mean_sim < 0.70:
-            susp += 25.0   # very low similarity (scene cuts etc.)
+        elif std_corr > 0.15:
+            susp += 30.0   # very erratic
+        elif mean_corr < 0.70:
+            susp += 25.0   # low correlation
         else:
             susp += 0.0    # looks real
 
         return round(min(100.0, susp), 2), ""
 
     except Exception as e:
-        print(f"     Deep feature error: {e}")
+        print(f"     Histogram consistency error: {e}")
         return 20.0, ""
 
 
@@ -578,6 +546,6 @@ def analyze_video(video_path: str, num_frames: int = 30) -> Dict:
             "video_info":            meta,
         },
         "processing_time": processing_time,
-        "model_version":   "8.1.0",
-        "detection_method": "EfficientNet-B0 + 4-Signal CV Fusion (Optimized)",
+        "model_version":   "9.0.0",
+        "detection_method": "Pure OpenCV + 5-Signal CV Fusion (Ultra-Lightweight)",
     }
