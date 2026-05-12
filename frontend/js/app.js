@@ -192,23 +192,6 @@ async function startAnalysis() {
     backBtn.style.pointerEvents = 'none';
   }
 
-  // ── Wake up backend if sleeping ──────────────────────────────────────────
-  const isAwake = await wakeUpBackend();
-  if (!isAwake) {
-    // Unlock UI
-    if (analyzeBtn) {
-      analyzeBtn.disabled = false;
-      analyzeBtn.style.opacity = '';
-      analyzeBtn.style.pointerEvents = '';
-    }
-    if (backBtn) {
-      backBtn.style.opacity = '';
-      backBtn.style.pointerEvents = '';
-    }
-    showToast('Could not connect to server. Please try again in a moment.', 'error');
-    return;
-  }
-
   const progressPanel = document.getElementById('progressPanel');
   if (progressPanel) progressPanel.classList.add('visible');
 
@@ -231,7 +214,7 @@ async function startAnalysis() {
       backBtn.style.opacity = '';
       backBtn.style.pointerEvents = '';
     }
-    showToast(err.message || 'Analysis failed. Is the backend running on port 8001?', 'error');
+    showToast(err.message || 'Analysis failed. Make sure backend is running: python main.py', 'error');
     return;
   }
 
@@ -240,61 +223,14 @@ async function startAnalysis() {
   showView('results');
 }
 
-// ── Wake up backend (handles cold start / sleep) ──────────────────────────────
-// For localhost: instant return (no wakeup needed)
-// For remote: pings /health up to 5 times with 6s gap
-async function wakeUpBackend() {
-  const baseUrl = window.BACKEND_URL || (
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
-      ? 'http://localhost:8080'
-      : 'https://deepfake-backend.onrender.com'
-  );
-
-  // If localhost — no sleep issue, skip wakeup completely
-  if (baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
-    console.log('[LOCAL] Backend is localhost - skipping wakeup check');
-    return true;
-  }
-
-  // Remote server - check if awake
-  showToast('Connecting to remote server...', 'info');
-
-  const MAX_TRIES  = 5;
-  const RETRY_GAP  = 6000; // 6 seconds between tries
-
-  for (let i = 0; i < MAX_TRIES; i++) {
-    try {
-      const res = await fetch(baseUrl + '/health', {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000), // 5s per attempt
-      });
-      if (res.ok) {
-        if (i > 0) showToast('Server is ready!', 'success');
-        return true;
-      }
-    } catch (_) {
-      // Server not yet awake — wait and retry
-    }
-    if (i < MAX_TRIES - 1) {
-      showToast(`Server waking up... (${i + 1}/${MAX_TRIES})`, 'info');
-      await sleep(RETRY_GAP);
-    }
-  }
-  return false; // gave up after 5 tries
-}
-
 async function fetchPrediction(file) {
   const frameCount = parseInt(document.getElementById('frameSlider')?.value || '30');
   const formData = new FormData();
   formData.append('upload_video_file', file);
   formData.append('num_frames', frameCount.toString());
 
-  // Use environment variable or fallback to localhost/Render
-  const backendUrl = window.BACKEND_URL || (
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
-      ? 'http://localhost:8080'
-      : 'https://deepfake-backend.onrender.com'
-  );
+  // Local backend only
+  const backendUrl = 'http://localhost:8080';
 
   const controller = new AbortController();
   const timeoutId  = setTimeout(() => controller.abort(), 10 * 60 * 1000); // 10 minutes
@@ -311,12 +247,7 @@ async function fetchPrediction(file) {
     if (err.name === 'AbortError') {
       throw new Error('Request timed out (10 min). Please try again.');
     }
-    throw new Error(
-      'Cannot reach backend server. ' +
-      (backendUrl.includes('localhost')
-        ? 'Make sure the backend is running: cd backend && python main.py'
-        : 'The server may be sleeping — please wait 30 seconds and try again.')
-    );
+    throw new Error('Cannot reach backend. Make sure it is running: cd backend && python main.py');
   }
   clearTimeout(timeoutId);
 
