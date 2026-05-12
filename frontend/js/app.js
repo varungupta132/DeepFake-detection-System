@@ -245,7 +245,7 @@ async function startAnalysis() {
 async function wakeUpBackend() {
   const baseUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
-      ? 'http://localhost:8001'
+      ? 'http://localhost:8080'
       : 'https://deepfake-detection-system-ktft.onrender.com'
   );
 
@@ -286,7 +286,7 @@ async function fetchPrediction(file) {
 
   const backendUrl = (window.CONFIG && window.CONFIG.BACKEND_URL) ? window.CONFIG.BACKEND_URL : (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
-      ? 'http://localhost:8001'
+      ? 'http://localhost:8080'
       : 'https://deepfake-detection-system-ktft.onrender.com'
   );
 

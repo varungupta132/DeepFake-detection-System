@@ -1,7 +1,7 @@
 """
-DeepScan AI — FastAPI Backend
-TensorFlow + OpenCV multi-signal deepfake detection
-No PyTorch, no frames preview in response
+DeepScan AI — FastAPI Backend v9.0 (Ultra-Lightweight)
+Pure OpenCV + NumPy deepfake detection
+NO PyTorch, NO TensorFlow - Optimized for 512MB RAM
 """
 
 import os
@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -35,9 +35,10 @@ ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".wmv", ".mpeg", 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("\n" + "=" * 55)
-    print("  DeepScan AI -- Backend v5.0")
-    print("  http://0.0.0.0:8000")
-    print("  Docs: http://0.0.0.0:8000/docs")
+    print("  DeepScan AI -- Pure Python Backend v9.0")
+    print("  http://0.0.0.0:8080")
+    print("  Docs: http://0.0.0.0:8080/docs")
+    print("  Ultra-lightweight: Pure OpenCV (NO PyTorch)")
     print("=" * 55 + "\n")
 
     # Cleanup stale uploads older than 1 hour
@@ -53,20 +54,15 @@ async def lifespan(app: FastAPI):
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="DeepScan AI API",
-    description="TensorFlow + OpenCV deepfake detection — no PyTorch required",
-    version="5.0.0",
+    description="Pure OpenCV + 5-Signal CV Fusion deepfake detection (Ultra-Lightweight)",
+    version="9.0.0",
     lifespan=lifespan,
 )
-
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "https://deep-fake-detection-system-theta.vercel.app,http://localhost:3000,http://localhost:8000,http://127.0.0.1:5500"
-).split(",")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,  # must be False when allow_origins=["*"]
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -77,9 +73,9 @@ app.add_middleware(
 async def root():
     return {
         "name": "DeepScan AI",
-        "version": "5.0.0",
+        "version": "9.0.0",
         "status": "running",
-        "stack": "TensorFlow + OpenCV (no PyTorch)",
+        "stack": "Pure Python + OpenCV (Ultra-Lightweight)",
         "endpoints": {
             "health": "/health",
             "predict": "POST /api/predict/",
@@ -92,19 +88,22 @@ async def root():
 async def health():
     return {
         "status": "healthy",
-        "model": "TF MobileNetV2 + 6-Signal CV Fusion",
-        "version": "5.0.0",
+        "version": "9.0.0",
+        "detection_method": "Pure OpenCV + 5-Signal CV Fusion",
     }
 
 
 @app.post("/api/predict/")
-async def predict(upload_video_file: UploadFile = File(...)):
+async def predict(
+    upload_video_file: UploadFile = File(...),
+    num_frames: int = Form(30)
+):
     """
     Analyze a video for deepfake manipulation.
 
     - Accepts: MP4, AVI, MOV, MKV, WebM (max 100 MB)
-    - Returns: verdict, confidence, 7-signal analysis breakdown
-    - No frame images returned — clean JSON only
+    - Returns: verdict, confidence, 5-signal analysis breakdown
+    - Ultra-lightweight: < 250MB RAM usage
     """
     temp_path = None
 
@@ -133,10 +132,12 @@ async def predict(upload_video_file: UploadFile = File(...)):
         if size_mb > 100:
             raise HTTPException(status_code=413, detail="File exceeds 100 MB limit.")
 
-        print(f"\n[RECEIVED] {filename} ({size_mb:.1f} MB)")
+        # Clamp num_frames between 10 and 60
+        frames = max(10, min(60, num_frames))
+        print(f"\n[RECEIVED] {filename} ({size_mb:.1f} MB) | frames: {frames}")
 
         # ── Analyze ───────────────────────────────────────────────────────────
-        result = analyze_video(temp_path)
+        result = analyze_video(temp_path, num_frames=frames)
         return JSONResponse(content=result)
 
     except HTTPException:
@@ -157,11 +158,11 @@ async def predict(upload_video_file: UploadFile = File(...)):
 
 # ── Entry Point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", 8080))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
         port=port,
-        reload=True,
+        reload=False,
         log_level="info",
     )
