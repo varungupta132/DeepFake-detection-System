@@ -4,11 +4,36 @@ Usage: python run_detector.py <video_path> [num_frames]
        python run_detector.py --warmup   (preloads model only)
 Output: prints JSON result to stdout (last line)
 All errors printed to stderr so Node.js can capture them
+
+Includes 8-minute timeout to prevent hanging on slow servers
 """
 
 import sys
 import json
 import traceback
+import signal
+
+# ── Timeout handler ────────────────────────────────────────────────────────────
+def timeout_handler(signum, frame):
+    print(json.dumps({
+        "output": "REAL",
+        "confidence": 50.0,
+        "probabilities": {"real": 50.0, "fake": 50.0},
+        "analysis": {
+            "suspicious_score": 0,
+            "warning_flags": ["Processing timeout - video too long or server overloaded"],
+            "video_info": {}
+        },
+        "processing_time": 480,
+        "model_version": "8.1.0",
+        "detection_method": "Timeout fallback",
+        "error": "Processing timeout after 8 minutes"
+    }), flush=True)
+    sys.exit(1)
+
+# Set 8-minute timeout (480 seconds)
+signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(480)
 
 # ── Warmup mode — just load the model and exit ────────────────────────────────
 if len(sys.argv) > 1 and sys.argv[1] == '--warmup':
