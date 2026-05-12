@@ -291,7 +291,7 @@ async function fetchPrediction(file) {
   );
 
   const controller = new AbortController();
-  const timeoutId  = setTimeout(() => controller.abort(), 3 * 60 * 1000);
+  const timeoutId  = setTimeout(() => controller.abort(), 10 * 60 * 1000); // 10 minutes
 
   let response;
   try {
@@ -303,7 +303,7 @@ async function fetchPrediction(file) {
   } catch (err) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      throw new Error('Request timed out (3 min). Please try again.');
+      throw new Error('Request timed out (10 min). Please try again.');
     }
     throw new Error(
       'Cannot reach backend server. ' +
